@@ -1,0 +1,66 @@
+﻿<Window x:Class="ETAG_ERP.Views.PriceQuoteView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="عرض سعر" Height="720" Width="1100"
+        WindowStartupLocation="CenterScreen"
+        FlowDirection="RightToLeft"
+        Background="#F9F9F9"
+        x:Name="RootWindow">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- بيانات العميل والتاريخ -->
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
+            <TextBlock Text="العميل:" VerticalAlignment="Center" Margin="5"/>
+            <ComboBox Width="200" ItemsSource="{Binding Clients}" SelectedItem="{Binding SelectedClient}" DisplayMemberPath="Name" Margin="5"/>
+
+            <TextBlock Text="التاريخ:" VerticalAlignment="Center" Margin="15,0,5,0"/>
+            <DatePicker Width="150" SelectedDate="{Binding QuoteDate}" Margin="5"/>
+
+            <TextBlock Text="طريقة الدفع:" VerticalAlignment="Center" Margin="15,0,5,0"/>
+            <ComboBox Width="150" SelectedItem="{Binding PaymentMethod}" Margin="5">
+                <ComboBoxItem Content="نقدًا"/>
+                <ComboBoxItem Content="فيزا"/>
+                <ComboBoxItem Content="تحويل بنكي"/>
+                <ComboBoxItem Content="أخرى"/>
+            </ComboBox>
+        </StackPanel>
+
+        <!-- جدول الأصناف -->
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding QuoteItems}"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="True"
+                  Margin="0,0,0,10"
+                  IsReadOnly="False"
+                  >
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="اسم الصنف" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                <DataGridTextColumn Header="الكمية" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" Width="*"/>
+                <DataGridTextColumn Header="سعر الوحدة" Binding="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" Width="*"/>
+                <DataGridTextColumn Header="الإجمالي" Binding="{Binding Total, StringFormat=N2}" Width="*" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- إجماليات وأزرار -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <TextBlock Text="الخصم:" VerticalAlignment="Center" Margin="5"/>
+            <TextBox Width="100" Text="{Binding Discount, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+
+            <TextBlock Text="الإجمالي:" VerticalAlignment="Center" Margin="15,0,5,0"/>
+            <TextBlock Width="100" Text="{Binding Total, StringFormat=N2}" Margin="5" Background="#EEE" Padding="5"/>
+
+            <TextBlock Text="الصافي:" VerticalAlignment="Center" Margin="15,0,5,0"/>
+            <TextBlock Width="100" Text="{Binding NetTotal, StringFormat=N2}" Margin="5" Background="#EEE" Padding="5"/>
+
+            <Button Content="حفظ" Width="100" Margin="10" Command="{Binding SaveCommand}"/>
+            <Button Content="تحويل إلى فاتورة" Width="140" Margin="10" Command="{Binding ConvertToInvoiceCommand}"/>
+            <Button Content="طباعة" Width="100" Margin="10" Command="{Binding PrintCommand}"/>
+        </StackPanel>
+    </Grid>
+</Window>

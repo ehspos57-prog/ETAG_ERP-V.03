@@ -1,0 +1,56 @@
+﻿<UserControl x:Class="ETAG_ERP.Views.ExpensesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:ETAG_ERP.Models"
+             FlowDirection="RightToLeft"
+             Background="#F8F8F8">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 🔍 فلاتر البحث -->
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0 0 0 10">
+            <TextBlock Text="من:" Margin="5" VerticalAlignment="Center"/>
+            <DatePicker x:Name="FromDatePicker" Width="120" Margin="0,0,10,0"/>
+            <TextBlock Text="إلى:" Margin="5" VerticalAlignment="Center"/>
+            <DatePicker x:Name="ToDatePicker" Width="120" Margin="0,0,10,0"/>
+            <TextBox x:Name="SearchBox" Width="250" Margin="0,0,10,0" ToolTip="ابحث عن مصروف أو وصف"/>
+            <Button Content="تصفية" Width="100" Click="Filter_Click"/>
+        </StackPanel>
+
+        <!-- 📋 جدول المصروفات -->
+        <DataGrid Grid.Row="1"
+                  x:Name="ExpensesGrid"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  IsReadOnly="True"
+                  Margin="0 0 0 10">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="التاريخ" Binding="{Binding Date}" Width="*"/>
+                <DataGridTextColumn Header="المبلغ" Binding="{Binding Amount}" Width="*"/>
+                <DataGridTextColumn Header="النوع" Binding="{Binding Category}" Width="*"/>
+                <DataGridTextColumn Header="الوصف" Binding="{Binding Description}" Width="2*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- ✅ أزرار العمليات -->
+        <DockPanel Grid.Row="2" Margin="0,5">
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                <Button Content="إغلاق" Width="80" Margin="5" Click="Close_Click"/>
+                <Button Content="إضافة" Width="120" Margin="5" Click="Add_Click"/>
+                <Button Content="تعديل" Width="80" Margin="5" Click="Edit_Click"/>
+                <Button Content="حذف" Width="80" Margin="5" Click="Delete_Click"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                <Button Content="تحديث" Width="80" Margin="5" Click="Refresh_Click"/>
+                <Button Content="تصدير" Width="100" Margin="5" Click="Export_Click"/>
+                <Button Content="طباعة" Width="80" Margin="5" Click="Print_Click"/>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</UserControl>
