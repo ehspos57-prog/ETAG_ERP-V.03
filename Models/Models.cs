@@ -5,28 +5,8 @@ using System.Runtime.CompilerServices;
 
 namespace ETAG_ERP.Models
 {
-    public class BaseEntity
-    {
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public string CreatedBy { get; set; } = string.Empty;
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
-        public string UpdatedBy { get; set; } = string.Empty;
-        public bool IsActive { get; set; } = true;
-    }
-    public class Branch
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = "";
-        public string Type { get; set; } = "";
-        public string Location { get; set; } = "";
-        public bool IsActive { get; set; }
-        public string Address { get; set; } = "";
-        public string Phone { get; set; } = "";
-        public DateTime CreatedAt { get; set; }
-        public string CreatedBy { get; set; } = "";
-        public DateTime UpdatedAt { get; set; }
-        public string UpdatedBy { get; set; } = "";
-    }
+
+
 
     public class AppUser
     {
@@ -42,6 +22,21 @@ namespace ETAG_ERP.Models
         public string Name { get; set; } = "";
         public string Job { get; set; } = "";
         public string Phone { get; set; } = "";
+    }
+    public class InvoiceLine
+    {
+        public int Id { get; set; }
+        public int InvoiceId { get; set; }
+        public int ItemId { get; set; }
+        public double Quantity { get; set; }
+        public double UnitPrice { get; set; }
+        public double Total { get; set; }
+        public string? InvoiceNumber { get; set; }
+        public DateTime Date { get; set; } = DateTime.Now;
+        public int? ClientId { get; set; }
+        public string? Notes { get; set; }
+
+        public List<InvoiceLine> Lines { get; set; } = new List<InvoiceLine>();
     }
 
     public class AccountLite
@@ -101,6 +96,7 @@ namespace ETAG_ERP.Models
         public object ExpenseDate { get; internal set; }
         public object Category { get; internal set; }
         public string Username { get; internal set; }
+
     }
 
     public class User
@@ -141,7 +137,9 @@ namespace ETAG_ERP.Models
         public decimal Balance { get; set; }
         public string? ClientName { get; set; }
         public decimal Amount { get; set; }
-        public DateTime Date { get; set; }
+        public DateTime Date { get; set; } = DateTime.Now;
+        public string? Account { get; set; }
+        public string? Notes { get; set; }
         public string Reference { get; set; } = "";
         public string Category { get; set; } = ""; // مشروع / مصروف / عميل
         public int AccountId { get; set; }
@@ -187,6 +185,10 @@ namespace ETAG_ERP.Models
         public List<Route> Routes { get; set; } = new List<Route>();
         public List<TaskSchedule> Tasks { get; set; } = new List<TaskSchedule>();
 
+        public static implicit operator Employee?(string? v)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class Account
@@ -217,6 +219,7 @@ namespace ETAG_ERP.Models
         public string? ResponsibleEngineer { get; set; }
         public string? Fax { get; set; }
         public string? BusinessField { get; set; }
+
 
         public string? EngineerName { get; set; }
         public DateTime? EvaluationDate { get; set; }
@@ -274,6 +277,9 @@ namespace ETAG_ERP.Models
         public decimal? Discount { get; set; }
         public string? Description { get; set; }
         public string? ImagePath { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public double SellPrice { get; set; }
+        public string? CategoryPath { get; set; }
         public List<string> Categories { get; set; } = new List<string>();
 
         // Cat1..Cat5
@@ -308,6 +314,8 @@ namespace ETAG_ERP.Models
         public string? Description { get; internal set; }
         public string? Username { get; internal set; }
         public string? SupplierName { get; internal set; }
+        public double Total { get; set; }
+        public List<InvoiceLine> Lines { get; set; } = new List<InvoiceLine>();
     }
 
     public class InvoiceItem : BaseEntity
@@ -340,6 +348,9 @@ namespace ETAG_ERP.Models
         public List<ReturnItem> Items { get; set; } = new List<ReturnItem>();
         public decimal TotalAmount { get; set; }
         public string? Notes { get; set; }
+        public DateTime Date { get; set; } = DateTime.Now;
+        public double Total { get; set; }
+
     }
 
     public class ReturnItem : BaseEntity
@@ -353,7 +364,12 @@ namespace ETAG_ERP.Models
         public string ItemName { get; set; } = string.Empty;
         public decimal Quantity { get; set; }
         public decimal UnitPrice { get; set; }
-        public decimal Total => UnitPrice * Quantity;
+        public string? ReturnNumber { get; set; }
+        public DateTime Date { get; set; } = DateTime.Now;
+        public int? ClientId { get; set; }
+        public double Total { get; set; }
+        public string? Notes { get; set; }
+
     }
 
     // =======================
@@ -410,6 +426,9 @@ namespace ETAG_ERP.Models
         public DateTime PurchaseDate { get; set; }
         public List<PurchaseItem> Items { get; set; } = new List<PurchaseItem>();
         public decimal TotalAmount { get; set; }
+        public DateTime Date { get; set; } = DateTime.Now;
+        public double Total { get; set; }
+        public string? Notes { get; set; }
     }
 
     public class PurchaseItem : BaseEntity
@@ -424,7 +443,11 @@ namespace ETAG_ERP.Models
         public decimal Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal Discount { get; set; }
-        public decimal Total => (UnitPrice * Quantity) - Discount;
+        public string? PurchaseNumber { get; set; }
+        public DateTime Date { get; set; } = DateTime.Now;
+        public string? Supplier { get; set; }
+        public double Total { get; set; }
+        public string? Notes { get; set; }
     }
     public class PriceOfferItem : BaseEntity
     {

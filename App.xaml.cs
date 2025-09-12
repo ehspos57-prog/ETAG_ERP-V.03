@@ -11,8 +11,8 @@ namespace ETAG_ERP
         {
             base.OnStartup(e);
 
-            // ✅ إنشاء قاعدة البيانات إذا لم تكن موجودة
-            SchemaCreator.CreateDatabaseAndTables();
+            // ✅ تهيئة قاعدة البيانات — يضمن إنشاء كل الجداول إذا لم تكن موجودة
+            DatabaseHelper.InitializeDatabase();
 
 #if DEBUG
             // فتح MainWindow مباشرة في وضع التطوير
@@ -26,13 +26,10 @@ namespace ETAG_ERP
             this.MainWindow = loginWindow;
 #endif
         }
-
-
     }
+
     public static class SessionManager
     {
         public static User CurrentUser { get; set; }
     }
-
-
 }

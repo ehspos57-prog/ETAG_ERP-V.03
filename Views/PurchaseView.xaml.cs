@@ -115,7 +115,7 @@ namespace ETAG_ERP.Views
         // تحديث إجمالي العناصر
         private void UpdateTotalAmountText()
         {
-            decimal total = currentItems.Sum(i => i.Total);
+            decimal total = (decimal)currentItems.Sum(i => i.Total);
             TotalAmountText.Text = total.ToString("N2");
         }
 
@@ -138,7 +138,7 @@ namespace ETAG_ERP.Views
                 return;
             }
 
-            decimal total = currentItems.Sum(i => i.Total);
+            decimal total = (decimal)currentItems.Sum(i => i.Total);
             string invoiceNumber = "P" + (DateTime.Now.Ticks % 1000000).ToString("D6");
 
             try
