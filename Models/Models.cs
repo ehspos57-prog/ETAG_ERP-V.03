@@ -123,6 +123,8 @@ namespace ETAG_ERP.Models
         public string CreatedBy { get; set; } = "";
         public DateTime UpdatedAt { get; set; }
         public string UpdatedBy { get; set; } = "";
+        public object Description { get; internal set; }
+        public bool IsActive { get; internal set; }
     }
     public class LedgerEntry : BaseEntity
     {
@@ -201,6 +203,8 @@ namespace ETAG_ERP.Models
         public string CreatedBy { get; set; } = "";
         public DateTime UpdatedAt { get; set; }
         public string UpdatedBy { get; set; } = "";
+        public object OpeningBalance { get; internal set; }
+        public object Description { get; internal set; }
     }
     // =======================
     // العملاء
@@ -429,6 +433,7 @@ namespace ETAG_ERP.Models
         public DateTime Date { get; set; } = DateTime.Now;
         public double Total { get; set; }
         public string? Notes { get; set; }
+        public object PaidAmount { get; internal set; }
     }
 
     public class PurchaseItem : BaseEntity
