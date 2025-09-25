@@ -1,0 +1,98 @@
+﻿<Window x:Class="ETAG_ERP.Views.InvoiceDetailsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="تفاصيل الفاتورة" Height="650" Width="850"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        FlowDirection="RightToLeft"
+        FontFamily="Segoe UI">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- معلومات أساسية -->
+            <RowDefinition Height="*"/>
+            <!-- عناصر الفاتورة -->
+            <RowDefinition Height="Auto"/>
+            <!-- الإجمالي -->
+            <RowDefinition Height="Auto"/>
+            <!-- أزرار -->
+        </Grid.RowDefinitions>
+
+        <!-- ======= معلومات الفاتورة الأساسية ======= -->
+        <Border Grid.Row="0" BorderBrush="#ddd" BorderThickness="0 0 0 1" Padding="10">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="🧾 تفاصيل الفاتورة" FontSize="22" FontWeight="Bold" Margin="0 0 0 10" />
+
+                <UniformGrid Columns="3" Margin="0 0 0 10">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="رقم الفاتورة: " FontWeight="Bold"/>
+                        <TextBlock Text="{Binding Invoice.InvoiceNumber}" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="التاريخ: " FontWeight="Bold"/>
+                        <TextBlock Text="{Binding Invoice.Date, StringFormat=yyyy/MM/dd}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="الحالة: " FontWeight="Bold"/>
+                        <TextBlock Text="{Binding Invoice.Status}"/>
+                    </StackPanel>
+                </UniformGrid>
+
+                <UniformGrid Columns="2" Margin="0 0 0 10">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="👤 العميل: " FontWeight="Bold"/>
+                        <TextBlock Text="{Binding Invoice.ClientName}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="📑 النوع: " FontWeight="Bold"/>
+                        <TextBlock Text="{Binding Invoice.Type}"/>
+                    </StackPanel>
+                </UniformGrid>
+
+                <TextBlock Text="الوصف / ملاحظات:" FontWeight="Bold"/>
+                <TextBlock Text="{Binding Invoice.Description}" TextWrapping="Wrap" Foreground="Gray"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ======= عناصر الفاتورة ======= -->
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Invoice.Items}" AutoGenerateColumns="False"
+                  CanUserAddRows="False" IsReadOnly="True" Margin="0 10 0 10" 
+                  AlternatingRowBackground="#f9f9f9" RowHeaderWidth="0">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="كود الصنف" Binding="{Binding ItemCode}" Width="Auto"/>
+                <DataGridTextColumn Header="اسم الصنف" Binding="{Binding ItemName}" Width="*"/>
+                <DataGridTextColumn Header="الكمية" Binding="{Binding Quantity}" Width="Auto"/>
+                <DataGridTextColumn Header="سعر الوحدة" Binding="{Binding UnitPrice}" Width="Auto"/>
+                <DataGridTextColumn Header="الخصم" Binding="{Binding Discount}" Width="Auto"/>
+                <DataGridTextColumn Header="الإجمالي" Binding="{Binding Total}" Width="Auto"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- ======= الإجمالي النهائي ======= -->
+        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" Margin="0 10 0 0">
+            <TextBlock Text="الإجمالي النهائي: " FontWeight="Bold" FontSize="16"/>
+            <TextBlock Text="{Binding Invoice.TotalAmount}" FontSize="16" Foreground="DarkGreen" Margin="10 0 0 0"/>
+        </StackPanel>
+
+        <!-- ======= الأزرار ======= -->
+        <DockPanel Grid.Row="3" Margin="0 10 0 0">
+
+            <!-- أزرار التصدير -->
+            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                <Button Content="📄 تصدير PDF" Width="120" Margin="5" Click="ExportPdfButton_Click"/>
+                <Button Content="📊 تصدير Excel" Width="120" Margin="5" Click="ExportExcelButton_Click"/>
+                <Button Content="📡 تصدير XML (للبوابة)" Width="160" Margin="5" Click="ExportXmlButton_Click"/>
+            </StackPanel>
+
+            <!-- أزرار العمليات -->
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="🖨️ طباعة" Width="100" Margin="5" Click="PrintButton_Click"/>
+                <Button Content="❌ إغلاق" Width="100" Margin="5" Click="CloseButton_Click"/>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</Window>

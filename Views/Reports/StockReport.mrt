@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StiSerializer version="1.02">
+  <Dictionary Ref="1" />
+  <Report Ref="2" ReportAlias="تقرير جرد المخزون" ReportAuthor="ETAG ERP"
+          ReportCreated="2025-09-14" ReportDescription="Stock Report"
+          ReportName="StockReport" ReportUnit="Centimeters">
+    <Dictionary Ref="3">
+      <DataSources>
+        <StiDataTableSource Name="Items" Alias="Items" Ref="4" DataType="System.Data.DataTable" />
+      </DataSources>
+    </Dictionary>
+    <Pages>
+      <Page Name="Page1" Ref="5" PaperSize="A4" Orientation="Portrait">
+        <Components>
+          <!-- العنوان -->
+          <Text Name="TitleText" Ref="6" Left="0" Top="0" Width="19" Height="2"
+                HorAlignment="Center" VertAlignment="Center"
+                Font="Arial,20pt,Bold" Text="تقرير جرد المخزون" />
+
+          <!-- الجدول -->
+          <DataBand Name="DataBand1" Ref="7" Top="3" Width="19" Height="1"
+                    DataSourceName="Items">
+            <Components>
+              <Text Name="TextId" Ref="8" Width="3" Height="1" Border.Side="All"
+                    Text="[Items.Id]" HorAlignment="Center" VertAlignment="Center" />
+              <Text Name="TextName" Ref="9" Left="3" Width="6" Height="1" Border.Side="All"
+                    Text="[Items.Name]" HorAlignment="Center" VertAlignment="Center" />
+              <Text Name="TextQty" Ref="10" Left="9" Width="3" Height="1" Border.Side="All"
+                    Text="[Items.Quantity]" HorAlignment="Center" VertAlignment="Center" />
+              <Text Name="TextPrice" Ref="11" Left="12" Width="3" Height="1" Border.Side="All"
+                    Text="[Items.Price]" HorAlignment="Center" VertAlignment="Center" />
+              <Text Name="TextTotal" Ref="12" Left="15" Width="4" Height="1" Border.Side="All"
+                    Text="[Items.Quantity*Items.Price]" HorAlignment="Center" VertAlignment="Center" />
+            </Components>
+          </DataBand>
+        </Components>
+      </Page>
+    </Pages>
+  </Report>
+</StiSerializer>

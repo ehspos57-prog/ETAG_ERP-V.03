@@ -1,0 +1,78 @@
+﻿<UserControl x:Class="ETAG_ERP.Views.InvoicesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Background="White">
+
+    <Grid>
+
+        <!-- العنوان و أزرار التحكم -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,0,10">
+            <TextBlock Text="📑 فواتير البيع" 
+                       FontSize="24" 
+                       FontWeight="Bold" 
+                       Foreground="DarkSlateBlue" 
+                       VerticalAlignment="Center"/>
+
+            <TextBox x:Name="SearchBox" Width="200" Margin="20,0,0,0" 
+                     VerticalAlignment="Center" 
+                     TextChanged="SearchBox_TextChanged"/>
+
+            <Button Content="➕ إضافة فاتورة" 
+                    Background="#4CAF50" Foreground="White" 
+                    Padding="10,5" Margin="10,0" Click="AddInvoice_Click"/>
+
+            <Button Content="🔄 تحديث" 
+                    Background="#2196F3" Foreground="White" 
+                    Padding="10,5" Margin="5,0" Click="RefreshInvoices_Click"/>
+
+            <Button Content="⬇️ تصدير" 
+                    Background="#FF9800" Foreground="White" 
+                    Padding="10,5" Margin="5,0" Click="ExportInvoices_Click"/>
+        </StackPanel>
+
+        <!-- جدول الفواتير -->
+        <DataGrid x:Name="InvoicesGrid" 
+                  Grid.Row="1" 
+                  AutoGenerateColumns="False" 
+                  CanUserAddRows="True" 
+                  CanUserDeleteRows="True"
+                  IsReadOnly="False"
+                  CanUserSortColumns="True"
+                  CanUserReorderColumns="True"
+                  CanUserResizeColumns="True"
+                  Margin="0,10,0,0"
+                  RowHeaderWidth="30"
+                  AlternatingRowBackground="#f9f9f9"
+                  GridLinesVisibility="All"
+                  CellEditEnding="InvoicesGrid_CellEditEnding">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="📌 رقم الفاتورة" Binding="{Binding InvoiceNumber}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="👤 اسم العميل" Binding="{Binding ClientName}" />
+                <DataGridTextColumn Header="📅 التاريخ" Binding="{Binding Date, StringFormat={}{0:yyyy/MM/dd}}" />
+                <DataGridTextColumn Header="💰 الإجمالي" Binding="{Binding Total}" IsReadOnly="True"/>
+
+                <DataGridTemplateColumn Header="⚙️ إجراء">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Content="👁 عرض" Margin="2" Padding="5,2" 
+                                        Background="#673AB7" Foreground="White"
+                                        Click="ViewDetails_Click"/>
+                                <Button Content="🖨 طباعة" Margin="2" Padding="5,2" 
+                                        Background="#009688" Foreground="White"
+                                        Click="PrintInvoice_Click"/>
+                                <Button Content="🗑 حذف" Margin="2" Padding="5,2" 
+                                        Background="#F44336" Foreground="White"
+                                        Click="DeleteInvoice_Click"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
