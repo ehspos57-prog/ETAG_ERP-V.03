@@ -10,6 +10,8 @@ public static class DatabaseHelper
     private static string _dbPath = "ETAG_ERP.db";
     private static readonly string _connectionString = $"Data Source={_dbPath};Version=3;";
 
+    public static string ConnectionString { get; internal set; }
+
     public static void SetDatabasePath(string path)
     {
         _dbPath = path;
@@ -927,7 +929,7 @@ public static class DatabaseHelper
         ExecuteNonQuery(sql,
             new SQLiteParameter("@ExpenseType", expense.ExpenseType ?? ""),
             new SQLiteParameter("@Amount", expense.Amount),
-            new SQLiteParameter("@ExpenseDate", expense.ExpenseDate ?? ""),
+            new SQLiteParameter("@ExpenseDate", expense.ExpenseDate ?? null),
             new SQLiteParameter("@Description", expense.Description ?? ""),
             new SQLiteParameter("@Category", expense.Category ?? ""));
         return Convert.ToInt32(ExecuteScalar("SELECT last_insert_rowid();"));
@@ -941,7 +943,7 @@ public static class DatabaseHelper
         ExecuteNonQuery(sql,
             new SQLiteParameter("@ExpenseType", expense.ExpenseType ?? ""),
             new SQLiteParameter("@Amount", expense.Amount),
-            new SQLiteParameter("@ExpenseDate", expense.ExpenseDate ?? ""),
+            new SQLiteParameter("@ExpenseDate", expense.ExpenseDate ?? null),
             new SQLiteParameter("@Description", expense.Description ?? ""),
             new SQLiteParameter("@Category", expense.Category ?? ""),
             new SQLiteParameter("@Id", expense.Id));
@@ -960,7 +962,6 @@ public static class DatabaseHelper
                 Id = Convert.ToInt32(r["Id"]),
                 ExpenseType = r["ExpenseType"]?.ToString(),
                 Amount = r.Table.Columns.Contains("Amount") && r["Amount"] != DBNull.Value ? Convert.ToDecimal(r["Amount"]) : 0,
-                ExpenseDate = r["ExpenseDate"]?.ToString(),
                 Description = r["Description"]?.ToString(),
                 Category = r["Category"]?.ToString()
             });
@@ -1165,4 +1166,36 @@ public static class DatabaseHelper
     {
         throw new NotImplementedException();
     }
+
+    public static List<Category> GetCategories()
+    {
+        var categories = new List<Category>();
+
+        using (var conn = new SQLiteConnection(_connectionString))
+        {
+            conn.Open();
+            string query = "SELECT CategoryID, Code, Family, SubFamily, SubSubFamily, SubSubSubFamily, SubSubSubSubFamily FROM Categories";
+
+            using (var cmd = new SQLiteCommand(query, conn))
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    categories.Add(new Category
+                    {
+                        CategoryID = reader.GetInt32(0),
+                        Code = reader.GetString(1),
+                        Family = reader.IsDBNull(2) ? null : reader.GetString(2),
+                        SubFamily = reader.IsDBNull(3) ? null : reader.GetString(3),
+                        SubSubFamily = reader.IsDBNull(4) ? null : reader.GetString(4),
+                        SubSubSubFamily = reader.IsDBNull(5) ? null : reader.GetString(5),
+                        SubSubSubSubFamily = reader.IsDBNull(6) ? null : reader.GetString(6),
+                    });
+                }
+            }
+        }
+
+        return categories;
+    }
+
 }
