@@ -1,4 +1,5 @@
-﻿using ETAG_ERP.Models;
+﻿using ETAG_ERP.Helpers;
+using ETAG_ERP.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -388,6 +389,53 @@ public static class DatabaseHelper
         if (parameters != null && parameters.Length > 0) cmd.Parameters.AddRange(parameters);
         cmd.ExecuteNonQuery();
     }
+    public static DataTable GetCategories(int? parentId = null)
+    {
+        using (var conn = new SQLiteConnection(_connectionString))
+        {
+            conn.Open();
+            string query = parentId == null
+                ? "SELECT Id, Name FROM Categories WHERE ParentId IS NULL"
+                : "SELECT Id, Name FROM Categories WHERE ParentId = @ParentId";
+
+            using (var cmd = new SQLiteCommand(query, conn))
+            {
+                if (parentId != null)
+                    cmd.Parameters.AddWithValue("@ParentId", parentId);
+
+                using (var da = new SQLiteDataAdapter(cmd))
+                {
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+
+                    // لو ما فيش صفوف من الداتا بيز للمستوى المطلوب، نُعيد DataTable جديد مبني من الـ Seed
+                    if (dt.Rows.Count == 0 && parentId == null)
+                    {
+                        DataTable seedDt = new DataTable();
+                        seedDt.Columns.Add("Id", typeof(int));
+                        seedDt.Columns.Add("Name", typeof(string));
+                        int id = 1;
+
+                        foreach (var name in CategorySeeder.GetSeedData()
+                            .Select(c => c.Level1)
+                            .Where(x => !string.IsNullOrWhiteSpace(x))
+                            .Distinct())
+                        {
+                            var row = seedDt.NewRow();
+                            row["Id"] = id++;
+                            row["Name"] = name;
+                            seedDt.Rows.Add(row);
+                        }
+
+                        return seedDt;
+                    }
+
+                    return dt;
+                }
+            }
+        }
+    }
+
 
     public static DataTable GetDataTable(string sql, params SQLiteParameter[] parameters)
     {
@@ -1251,13 +1299,7 @@ public static class DatabaseHelper
 
         return dt;
     }
-    internal static DataTable GetCategories(int? parentId = null)
-    {
-        string query = parentId == null
-            ? "SELECT Id, Name FROM Categories WHERE ParentId IS NULL"
-            : $"SELECT Id, Name FROM Categories WHERE ParentId = {parentId}";
 
-        return ExecuteQuery(query);
-    }
+
 
 }
