@@ -122,8 +122,8 @@ public static class DatabaseHelper
         cmd.CommandText = @"
             CREATE TABLE IF NOT EXISTS Categories (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                Name TEXT,
-                ParentId INTEGER,
+                Name TEXT NOT NULL,
+                ParentId INTEGER NULL,
                 Type TEXT,
                 Description TEXT,
                 IsActive INTEGER,
@@ -640,7 +640,7 @@ public static class DatabaseHelper
                 FullName = r["FullName"]?.ToString(),
                 JobTitle = r["JobTitle"]?.ToString(),
                 Salary = r.Table.Columns.Contains("Salary") && r["Salary"] != DBNull.Value ? Convert.ToDecimal(r["Salary"]) : 0,
-                
+
                 Phone = r["Phone"]?.ToString(),
                 Email = r["Email"]?.ToString()
             });
@@ -1196,6 +1196,68 @@ public static class DatabaseHelper
         }
 
         return categories;
+    }
+
+    internal static void InsertUser(ETAG_ERP.Views.User newUser)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal static void UpdateUser(ETAG_ERP.Views.User editingUser)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal static object ExecuteQuery(string v, Dictionary<string, object> dictionary)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Run scalar query (returns single value)
+    /// </summary>
+    public static object ExecuteScalar(string query, Dictionary<string, object>? parameters = null)
+    {
+        using (var conn = new SQLiteConnection(_connectionString))
+        {
+            conn.Open();
+            using (var cmd = new SQLiteCommand(query, conn))
+            {
+                if (parameters != null)
+                {
+                    foreach (var p in parameters)
+                        cmd.Parameters.AddWithValue(p.Key, p.Value ?? DBNull.Value);
+                }
+
+                return cmd.ExecuteScalar();
+            }
+        }
+    }
+    internal static System.Data.DataTable ExecuteQuery(string query)
+    {
+        var dt = new System.Data.DataTable();
+
+        using (var conn = new System.Data.SQLite.SQLiteConnection(_connectionString))
+        {
+            conn.Open();
+            using (var cmd = new System.Data.SQLite.SQLiteCommand(query, conn))
+            {
+                using (var adapter = new System.Data.SQLite.SQLiteDataAdapter(cmd))
+                {
+                    adapter.Fill(dt);
+                }
+            }
+        }
+
+        return dt;
+    }
+    internal static DataTable GetCategories(int? parentId = null)
+    {
+        string query = parentId == null
+            ? "SELECT Id, Name FROM Categories WHERE ParentId IS NULL"
+            : $"SELECT Id, Name FROM Categories WHERE ParentId = {parentId}";
+
+        return ExecuteQuery(query);
     }
 
 }

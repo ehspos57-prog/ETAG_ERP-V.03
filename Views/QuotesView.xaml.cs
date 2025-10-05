@@ -142,18 +142,6 @@ namespace ETAG_ERP.Views
         }
 
         // ======================
-        // الأوامر
-        // ======================
-        public ICommand FilterCommand => new RelayCommand(ExecuteFilter);
-        public ICommand AddQuoteCommand => new RelayCommand(ExecuteAddQuote);
-        public ICommand EditQuoteCommand => new RelayCommand(ExecuteEditQuote);
-        public ICommand DeleteQuoteCommand => new RelayCommand(ExecuteDeleteQuote);
-        public ICommand RefreshCommand => new RelayCommand(ExecuteRefresh);
-        public ICommand ExportCommand => new RelayCommand(ExecuteExport);
-        public ICommand PrintCommand => new RelayCommand(ExecutePrint);
-        public ICommand OpenDetailsCommand => new RelayCommand(ExecuteOpenDetails);
-
-        // ======================
         // تنفيذ الأوامر
         // ======================
         private void ExecuteFilter()

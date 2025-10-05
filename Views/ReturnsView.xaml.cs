@@ -114,14 +114,7 @@ namespace ETAG_ERP.Views
         // ======================
         // الأوامر
         // ======================
-        public ICommand FilterCommand => new RelayCommand(ExecuteFilter);
-        public ICommand AddReturnCommand => new RelayCommand(ExecuteAdd);
-        public ICommand EditReturnCommand => new RelayCommand(ExecuteEdit, CanEditOrDelete);
-        public ICommand DeleteReturnCommand => new RelayCommand(ExecuteDelete, CanEditOrDelete);
-        public ICommand RefreshCommand => new RelayCommand(ExecuteRefresh);
-        public ICommand ExportCommand => new RelayCommand(ExecuteExport);
-        public ICommand PrintCommand => new RelayCommand(ExecutePrint);
-        public ICommand OpenDetailsCommand => new RelayCommand(ExecuteOpenDetails, CanOpenDetails);
+
 
         // ======================
         // تنفيذ الأوامر
@@ -248,34 +241,4 @@ namespace ETAG_ERP.Views
         private void ShowMessage(string msg) => MessageBox.Show(msg);
     }
 
-    // ======================
-    // RelayCommand
-    // ======================
-    public class RelayCommand : ICommand
-    {
-        private readonly Action _execute;
-        private readonly Func<bool>? _canExecute;
-        private Action<object?> save;
-
-        public RelayCommand(Action execute, Func<bool>? canExecute = null)
-        {
-            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
-            _canExecute = canExecute;
-        }
-
-        public RelayCommand(Action<object?> save)
-        {
-            this.save = save;
-        }
-
-        public bool CanExecute(object? parameter) => _canExecute == null || _canExecute();
-
-        public void Execute(object? parameter) => _execute();
-
-        public event EventHandler? CanExecuteChanged
-        {
-            add => CommandManager.RequerySuggested += value;
-            remove => CommandManager.RequerySuggested -= value;
-        }
-    }
 }

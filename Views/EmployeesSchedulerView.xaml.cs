@@ -34,21 +34,7 @@ namespace ETAG_ERP.ViewModels
         public ICommand MarkCompleteCommand { get; }
         public ICommand RefreshCommand { get; }
 
-        public EmployeesSchedulerView()
-        {
-            Employees = new ObservableCollection<Employee>();
-            Tasks = new ObservableCollection<TaskSchedule>();
-            Routes = new ObservableCollection<Route>();
 
-            // Load Data (مؤقت – لغاية ما نربط DB)
-            SeedData();
-
-            AddTaskCommand = new RelayCommand(AddTask);
-            EditTaskCommand = new RelayCommand(EditTask, () => SelectedTask != null);
-            DeleteTaskCommand = new RelayCommand(DeleteTask, () => SelectedTask != null);
-            MarkCompleteCommand = new RelayCommand(MarkTaskComplete, () => SelectedTask != null);
-            RefreshCommand = new RelayCommand(RefreshData);
-        }
 
         private void LoadEmployeeData()
         {

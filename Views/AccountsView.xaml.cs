@@ -1,20 +1,17 @@
 ﻿using ClosedXML.Excel;
-using ETAG_ERP.Commands;
 using ETAG_ERP.Models;
-using ETAG_ERP.Helpers;
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Input;
+using System.Windows.Controls;
 
 namespace ETAG_ERP.Views
 {
-    public class AccountsViewModel : ETAGBaseViewModel
+    public partial class AccountsView : UserControl
     {
         private readonly string _dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ETAG.db");
         private bool IsUseDb = true;
@@ -23,51 +20,18 @@ namespace ETAG_ERP.Views
         public ObservableCollection<Client> Clients { get; set; } = new();
         public ObservableCollection<Invoice> SelectedClientInvoices { get; set; } = new();
 
-        private Client _selectedClient;
-        public Client SelectedClient
-        {
-            get => _selectedClient;
-            set
-            {
-                if (SetProperty(ref _selectedClient, value))
-                    LoadClientInvoices();
-            }
-        }
-
+        public Client SelectedClient { get; set; }
         public DateTime? FromDate { get; set; } = DateTime.Now.AddMonths(-1);
         public DateTime? ToDate { get; set; } = DateTime.Now;
 
-        public ObservableCollection<string> TransactionTypes { get; set; }
-        private string _selectedType;
-        public string SelectedType
-        {
-            get => _selectedType;
-            set
-            {
-                if (SetProperty(ref _selectedType, value))
-                    FilterTransactions();
-            }
-        }
+        public ObservableCollection<string> TransactionTypes { get; set; } = new()
+        { "المبيعات", "المشتريات", "المرتجعات", "عروض الأسعار", "المصروفات", "كشف الحساب" };
+        public string SelectedType { get; set; }
 
         public string SearchText { get; set; }
+        public int SelectedTabIndex { get; set; }
 
-        private int _selectedTabIndex;
-        public int SelectedTabIndex
-        {
-            get => _selectedTabIndex;
-            set
-            {
-                if (SetProperty(ref _selectedTabIndex, value))
-                    FilterTransactions();
-            }
-        }
-
-        private TransactionModel _selectedTransaction;
-        public TransactionModel SelectedTransaction
-        {
-            get => _selectedTransaction;
-            set => SetProperty(ref _selectedTransaction, value);
-        }
+        public TransactionModel SelectedTransaction { get; set; }
 
         public decimal TotalSales { get; set; }
         public decimal TotalPurchases { get; set; }
@@ -76,35 +40,14 @@ namespace ETAG_ERP.Views
         public decimal NetProfit { get; set; }
         public decimal CurrentBalance { get; set; }
 
-        // Commands
-        public ICommand FilterCommand { get; }
-        public ICommand ExportCommand { get; }
-        public ICommand PrintCommand { get; }
-        public ICommand AddTransactionCommand { get; }
-        public ICommand EditTransactionCommand { get; }
-        public ICommand DeleteTransactionCommand { get; }
-        public ICommand RefreshCommand { get; }
-        public ICommand OpenInvoiceDetailsCommand { get; }
-
-        public AccountsViewModel()
+        public AccountsView()
         {
-            TransactionTypes = new ObservableCollection<string>
-            {
-                "المبيعات","المشتريات","المرتجعات","عروض الأسعار","المصروفات","كشف الحساب"
-            };
-            SelectedType = TransactionTypes.FirstOrDefault();
-
-            FilterCommand = new RelayCommand(FilterTransactions);
-            ExportCommand = new RelayCommand(ExecuteExport);
-            PrintCommand = new RelayCommand(ExecutePrint);
-            AddTransactionCommand = new RelayCommand(ExecuteAddTransaction);
-            EditTransactionCommand = new RelayCommand(ExecuteEditTransaction, CanEditOrDelete);
-            DeleteTransactionCommand = new RelayCommand(ExecuteDeleteTransaction, CanEditOrDelete);
-            RefreshCommand = new RelayCommand(LoadAllData);
-            OpenInvoiceDetailsCommand = new RelayCommand<Invoice>(ExecuteOpenInvoiceDetails);
-
+            InitializeComponent();
+            DataContext = this;
             LoadAllData();
         }
+
+        #region Data Loading & Summary
 
         private void LoadAllData()
         {
@@ -117,13 +60,13 @@ namespace ETAG_ERP.Views
                 using var conn = new SQLiteConnection($"Data Source={_dbPath};Version=3;");
                 conn.Open();
 
-                // تحميل العملاء
+                // العملاء
                 using var cmdClients = new SQLiteCommand("SELECT Id, Name FROM Clients", conn);
                 using var readerC = cmdClients.ExecuteReader();
                 while (readerC.Read())
                     Clients.Add(new Client { Id = readerC.GetInt32(0), Name = readerC.GetString(1) });
 
-                // تحميل الحركات
+                // الحركات
                 using var cmdTrans = new SQLiteCommand("SELECT Date, Type, InvoiceNumber, Amount, Username, Description FROM Transactions", conn);
                 using var readerT = cmdTrans.ExecuteReader();
                 while (readerT.Read())
@@ -138,7 +81,7 @@ namespace ETAG_ERP.Views
                     });
             }
 
-            // بيانات تجريبية لو لا توجد DB
+            // بيانات تجريبية لو DB مش موجودة أو فارغة
             if (!Transactions.Any())
             {
                 Transactions.Add(new TransactionModel { Date = DateTime.Today, Type = "المبيعات", InvoiceNumber = "INV001", Amount = 5000, Username = "admin", Description = "بيع قطع غيار" });
@@ -149,24 +92,51 @@ namespace ETAG_ERP.Views
                 Clients.Add(new Client { Id = 2, Name = "شركة باء" });
             }
 
-            SelectedClient = Clients.FirstOrDefault();
+            SelectedClient ??= Clients.FirstOrDefault();
+            LoadClientInvoices();
             CalculateSummary();
         }
 
-        private void FilterTransactions()
+        private void LoadClientInvoices()
         {
-            var filtered = Transactions.Where(t =>
-                (!FromDate.HasValue || t.Date >= FromDate) &&
-                (!ToDate.HasValue || t.Date <= ToDate) &&
-                (string.IsNullOrEmpty(SelectedType) || t.Type == SelectedType) &&
-                (string.IsNullOrEmpty(SearchText) || (t.Description?.Contains(SearchText) == true))
-            ).ToList();
+            SelectedClientInvoices.Clear();
+            if (SelectedClient == null) return;
 
-            Transactions = new ObservableCollection<TransactionModel>(filtered);
+            // بيانات فواتير تجريبية
+            SelectedClientInvoices.Add(new Invoice { InvoiceNumber = "INV-001", Date = DateTime.Today.AddDays(-10), Status = "مدفوعة", TotalAmount = 5000 });
+            SelectedClientInvoices.Add(new Invoice { InvoiceNumber = "INV-002", Date = DateTime.Today.AddDays(-5), Status = "قيد الدفع", TotalAmount = 3000 });
+        }
+
+        private void CalculateSummary()
+        {
+            TotalSales = Transactions.Where(t => t.Type == "المبيعات").Sum(t => t.Amount);
+            TotalPurchases = Transactions.Where(t => t.Type == "المشتريات").Sum(t => t.Amount);
+            TotalReturns = Transactions.Where(t => t.Type == "المرتجعات").Sum(t => t.Amount);
+            TotalExpenses = 0;
+            NetProfit = TotalSales - TotalPurchases - TotalReturns - TotalExpenses;
+            CurrentBalance = NetProfit;
+        }
+
+        #endregion
+
+        #region Button Events
+
+        private void FilterTransactions_Click(object sender, RoutedEventArgs e)
+        {
+            var filtered = Transactions
+                .Where(t =>
+                    (!FromDate.HasValue || t.Date >= FromDate) &&
+                    (!ToDate.HasValue || t.Date <= ToDate) &&
+                    (string.IsNullOrEmpty(SelectedType) || t.Type == SelectedType) &&
+                    (string.IsNullOrEmpty(SearchText) || t.Description?.Contains(SearchText) == true)
+                ).ToList();
+
+            Transactions.Clear();
+            foreach (var t in filtered) Transactions.Add(t);
             CalculateSummary();
         }
 
-        private void ExecuteExport()
+        private void ExportTransactions_Click(object sender, RoutedEventArgs e)
         {
             if (!Transactions.Any())
             {
@@ -189,7 +159,7 @@ namespace ETAG_ERP.Views
             {
                 ws.Cell(row, 1).Value = t.Date.ToString("yyyy-MM-dd");
                 ws.Cell(row, 2).Value = t.Type;
-                ws.Cell(row, 3).Value = t.GetInvoiceNumber();
+                ws.Cell(row, 3).Value = t.InvoiceNumber;
                 ws.Cell(row, 4).Value = t.Amount;
                 ws.Cell(row, 5).Value = t.Username;
                 ws.Cell(row, 6).Value = t.Description;
@@ -202,63 +172,106 @@ namespace ETAG_ERP.Views
             Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
         }
 
-        private void ExecutePrint() => MessageBox.Show("سيتم الطباعة باستخدام FastReport (ضع القالب لاحقاً)");
-        private void ExecuteAddTransaction() => MessageBox.Show("إضافة حركة جديدة (لم يتم تنفيذ الواجهة بعد)");
-        private bool CanEditOrDelete() => SelectedTransaction != null;
-        private void ExecuteEditTransaction() => MessageBox.Show("تعديل الحركة (لم يتم تنفيذ الواجهة بعد)");
-        private void ExecuteDeleteTransaction()
+        private void PrintTransactions_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("سيتم الطباعة باستخدام FastReport (ضع القالب لاحقاً)");
+        }
+
+        private void AddTransaction_Click(object sender, RoutedEventArgs e)
+        {
+            var newTrans = new TransactionModel
+            {
+                Date = DateTime.Now,
+                Type = "المبيعات",
+                InvoiceNumber = $"INV{Transactions.Count + 1:000}",
+                Amount = 1000,
+                Username = "admin",
+                Description = "بيع جديد"
+            };
+
+            if (IsUseDb && File.Exists(_dbPath))
+            {
+                using var conn = new SQLiteConnection($"Data Source={_dbPath};Version=3;");
+                conn.Open();
+                using var cmd = new SQLiteCommand(conn)
+                {
+                    CommandText = "INSERT INTO Transactions(Date, Type, InvoiceNumber, Amount, Username, Description) VALUES(@date,@type,@inv,@amt,@user,@desc)"
+                };
+                cmd.Parameters.AddWithValue("@date", newTrans.Date);
+                cmd.Parameters.AddWithValue("@type", newTrans.Type);
+                cmd.Parameters.AddWithValue("@inv", newTrans.InvoiceNumber);
+                cmd.Parameters.AddWithValue("@amt", newTrans.Amount);
+                cmd.Parameters.AddWithValue("@user", newTrans.Username);
+                cmd.Parameters.AddWithValue("@desc", newTrans.Description);
+                cmd.ExecuteNonQuery();
+            }
+
+            Transactions.Add(newTrans);
+            CalculateSummary();
+        }
+
+        private void EditTransaction_Click(object sender, RoutedEventArgs e)
         {
             if (SelectedTransaction == null) return;
-            if (MessageBox.Show($"هل تريد حذف الحركة رقم {SelectedTransaction.GetInvoiceNumber()}؟", "تأكيد الحذف", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+
+            SelectedTransaction.Amount += 100;
+            CalculateSummary();
+
+            if (IsUseDb && File.Exists(_dbPath))
             {
-                Transactions.Remove(SelectedTransaction);
-                SelectedTransaction = null;
-                CalculateSummary();
+                using var conn = new SQLiteConnection($"Data Source={_dbPath};Version=3;");
+                conn.Open();
+                using var cmd = new SQLiteCommand("UPDATE Transactions SET Amount=@amt WHERE InvoiceNumber=@inv", conn);
+                cmd.Parameters.AddWithValue("@amt", SelectedTransaction.Amount);
+                cmd.Parameters.AddWithValue("@inv", SelectedTransaction.InvoiceNumber);
+                cmd.ExecuteNonQuery();
             }
         }
 
-        private void LoadClientInvoices()
+        private void DeleteTransaction_Click(object sender, RoutedEventArgs e)
         {
-            SelectedClientInvoices.Clear();
-            if (SelectedClient == null) return;
+            if (SelectedTransaction == null) return;
 
-            // بيانات تجريبية للفواتير
-            SelectedClientInvoices.Add(new Invoice { InvoiceNumber = "INV-001", Date = DateTime.Today.AddDays(-10), Status = "مدفوعة" });
-            SelectedClientInvoices.Add(new Invoice { InvoiceNumber = "INV-002", Date = DateTime.Today.AddDays(-5), Status = "قيد الدفع" });
+            if (MessageBox.Show($"هل تريد حذف الحركة رقم {SelectedTransaction.InvoiceNumber}؟", "تأكيد الحذف", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+                return;
+
+            if (IsUseDb && File.Exists(_dbPath))
+            {
+                using var conn = new SQLiteConnection($"Data Source={_dbPath};Version=3;");
+                conn.Open();
+                using var cmd = new SQLiteCommand("DELETE FROM Transactions WHERE InvoiceNumber=@inv", conn);
+                cmd.Parameters.AddWithValue("@inv", SelectedTransaction.InvoiceNumber);
+                cmd.ExecuteNonQuery();
+            }
+
+            Transactions.Remove(SelectedTransaction);
+            SelectedTransaction = null;
+            CalculateSummary();
         }
 
-        private void CalculateSummary()
+        private void Refresh_Click(object sender, RoutedEventArgs e)
         {
-            TotalSales = Transactions.Where(t => t.Type == "المبيعات").Sum(t => t.Amount);
-            TotalPurchases = Transactions.Where(t => t.Type == "المشتريات").Sum(t => t.Amount);
-            TotalReturns = Transactions.Where(t => t.Type == "المرتجعات").Sum(t => t.Amount);
-            TotalExpenses = 0;
-            NetProfit = TotalSales - TotalPurchases - TotalReturns - TotalExpenses;
-            CurrentBalance = NetProfit;
+            LoadAllData();
         }
 
-        private void ExecuteOpenInvoiceDetails(Invoice invoice)
+        private void OpenInvoiceDetails_Click(object sender, RoutedEventArgs e)
         {
-            if (invoice != null)
+            if (sender is Button btn && btn.DataContext is Invoice invoice)
             {
                 var window = new InvoiceDetailsWindow(invoice);
                 window.Show();
             }
         }
-    }
 
-    public class ETAGBaseViewModel : INotifyPropertyChanged
-    {
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected bool SetProperty<T>(ref T field, T value, string propName = null)
+        private void ClientsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!Equals(field, value))
+            if (sender is ListBox lb && lb.SelectedItem is Client client)
             {
-                field = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
-                return true;
+                SelectedClient = client;
+                LoadClientInvoices();
             }
-            return false;
         }
+
+        #endregion
     }
 }

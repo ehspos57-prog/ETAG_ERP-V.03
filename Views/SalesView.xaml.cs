@@ -19,11 +19,15 @@ namespace ETAG_ERP.Views
         public SalesView()
         {
             InitializeComponent();
-            // تعيين DataContext إلى ViewModel وليس نفس الـ UserControl
-            this.DataContext = new SalesViewModel();
+            DataContext = new SalesViewModel();
         }
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // يمكن إضافة أي تعامل إضافي عند تغيير الاختيار إذا احتجنا
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
 
         }
@@ -54,20 +58,19 @@ namespace ETAG_ERP.Views
         public ICommand ExportCommand { get; }
         public ICommand AddItemCommand { get; }
         public ICommand RemoveItemCommand { get; }
+        public ICommand OpenAddNewItemDialogCommand { get; }
 
         public SalesViewModel()
         {
             EnsureDatabaseExists();
             LoadItems();
 
-            SaveCommand = new RelayCommand(SaveInvoice);
-            PrintCommand = new RelayCommand(PrintInvoice);
-            ExportCommand = new RelayCommand(ExportInvoice);
+
             AddItemCommand = new RelayCommand<ItemModel>(AddItemToInvoice);
             RemoveItemCommand = new RelayCommand<InvoiceLineModel>(RemoveItemFromInvoice);
-
             SelectedItems.CollectionChanged += (s, e) => OnPropertyChanged(nameof(TotalAmount));
         }
+
 
         private void EnsureDatabaseExists()
         {
@@ -116,7 +119,7 @@ namespace ETAG_ERP.Views
             }
         }
 
-        private void LoadItems()
+        public void LoadItems()
         {
             Items.Clear();
             try
@@ -148,6 +151,38 @@ namespace ETAG_ERP.Views
             catch (Exception ex)
             {
                 MessageBox.Show("خطأ في تحميل الأصناف: " + ex.Message);
+            }
+        }
+
+        public void AddNewItem(ItemModel newItem)
+        {
+            if (newItem == null) return;
+
+            try
+            {
+                using var conn = new SQLiteConnection($"Data Source={dbPath};Version=3;");
+                conn.Open();
+
+                string insert = @"INSERT INTO Items (Name, Code, Category, ImagePath, PurchasePrice, Price1, Price2, Price3)
+                                  VALUES (@name, @code, @cat, @img, @pp, @p1, @p2, @p3);
+                                  SELECT last_insert_rowid();";
+
+                using var cmd = new SQLiteCommand(insert, conn);
+                cmd.Parameters.AddWithValue("@name", newItem.Name);
+                cmd.Parameters.AddWithValue("@code", newItem.Code);
+                cmd.Parameters.AddWithValue("@cat", newItem.Category);
+                cmd.Parameters.AddWithValue("@img", newItem.ImagePath ?? "");
+                cmd.Parameters.AddWithValue("@pp", newItem.PurchasePrice);
+                cmd.Parameters.AddWithValue("@p1", newItem.Price1);
+                cmd.Parameters.AddWithValue("@p2", newItem.Price2);
+                cmd.Parameters.AddWithValue("@p3", newItem.Price3);
+
+                newItem.Id = Convert.ToInt32(cmd.ExecuteScalar());
+                Items.Add(newItem); // يظهر مباشرة في UI
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("خطأ أثناء إضافة الصنف: " + ex.Message);
             }
         }
 
@@ -245,8 +280,7 @@ namespace ETAG_ERP.Views
 
         private FlowDocument GeneratePrintDocument()
         {
-            var doc = new FlowDocument();
-            doc.PagePadding = new Thickness(50);
+            var doc = new FlowDocument { PagePadding = new Thickness(50) };
 
             var header = new Paragraph(new Run("فاتورة المبيعات"))
             {
@@ -260,9 +294,7 @@ namespace ETAG_ERP.Views
             var table = new Table();
             doc.Blocks.Add(table);
 
-            int columns = 5;
-            for (int i = 0; i < columns; i++)
-                table.Columns.Add(new TableColumn());
+            for (int i = 0; i < 5; i++) table.Columns.Add(new TableColumn());
 
             var headerRow = new TableRow();
             headerRow.Cells.Add(new TableCell(new Paragraph(new Run("الكود"))));

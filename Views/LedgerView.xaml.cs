@@ -56,19 +56,6 @@ namespace ETAG_ERP.ViewModels
         public ICommand ExportCommand { get; }
         public ICommand PrintCommand { get; }
 
-        public LedgerViewModel()
-        {
-            FilterCommand = new RelayCommand(LoadData);                // بدون (_) لأن LoadData() ما بتاخدش باراميتر
-            ClearFilterCommand = new RelayCommand(ClearFilters);
-            AddCommand = new RelayCommand(AddEntry);
-            EditCommand = new RelayCommand(EditEntry, () => SelectedEntry != null);
-            DeleteCommand = new RelayCommand(DeleteEntry, () => SelectedEntry != null);
-            RefreshCommand = new RelayCommand(LoadData);
-            ExportCommand = new RelayCommand(ExportToExcel);
-            PrintCommand = new RelayCommand(PrintLedger);
-
-            LoadData();
-        }
 
 
         private void LoadData()

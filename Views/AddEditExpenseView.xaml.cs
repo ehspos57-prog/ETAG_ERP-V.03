@@ -15,13 +15,6 @@ namespace ETAG_ERP.ViewModels
 
         public Action? CloseAction { get; set; }
 
-        public AddEditExpenseViewModel(Expense? expense = null)
-        {
-            Expense = expense ?? new Expense { Date = DateTime.Now };
-
-            SaveCommand = new RelayCommand(Save);
-            CancelCommand = new RelayCommand(Cancel);
-        }
 
         private void Save(object? obj)
         {

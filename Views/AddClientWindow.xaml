@@ -34,12 +34,12 @@
                 <StackPanel Orientation="Horizontal" Margin="0,5">
                     <TextBlock Text="رقم الهاتف:" Width="120" VerticalAlignment="Center" FontSize="16"/>
                     <TextBox x:Name="PhoneTextBox" Width="240" Height="30"/>
-                    <TextBlock Text="فاكس:" Width="60" VerticalAlignment="Center" FontSize="16" Margin="10,0,0,0"/>
-                    <TextBox x:Name="FaxTextBox" Width="190" Height="30"/>
+                    <TextBlock Width="108" VerticalAlignment="Stretch" FontSize="16" Margin="10,0,0,0"><Run FlowDirection="RightToLeft" Text="الرقم ا"/><Run FlowDirection="RightToLeft" Language="ar-eg" Text="ل"/><Run FlowDirection="RightToLeft" Language="ar-eg" Text="موحد"/><Run Text=":"/></TextBlock>
+                    <TextBox x:Name="FaxTextBox" Width="143" Height="30"/>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="0,5">
-                    <TextBlock Text="البريد الإلكتروني:" Width="120" VerticalAlignment="Center" FontSize="16"/>
+                    <TextBlock Text="البريد الاليكتروني :" Width="120" VerticalAlignment="Center" FontSize="16"/>
                     <TextBox x:Name="EmailTextBox" Width="500" Height="30"/>
                 </StackPanel>
 

@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using System.Printing;
 using System.Windows.Controls;
 using System.Windows.Documents;
 
@@ -13,17 +12,45 @@ namespace ETAG_ERP.Views
 {
     public partial class AddClientWindow : Window
     {
-        public Client Client { get; set; } = new Client();
+        public Client Client { get; set; }
+        private bool IsEditMode = false;
 
+        // إضافة عميل جديد
+        public AddClientWindow()
+        {
+            InitializeComponent();
+            Client = new Client();
+        }
+
+        // تعديل عميل موجود
         public AddClientWindow(Client clone)
         {
             InitializeComponent();
+            Client = clone;
+            IsEditMode = true;
+
+            // تعبئة الحقول
+            ClientNameTextBox.Text = clone.Name;
+            AddressTextBox.Text = clone.Address;
+            PhoneTextBox.Text = clone.Phone;
+            FaxTextBox.Text = clone.Fax;
+            EmailTextBox.Text = clone.Email;
+            BusinessFieldTextBox.Text = clone.BusinessField;
+
+            EngineerNameTextBox.Text = clone.EngineerName;
+            EvaluationDatePicker.SelectedDate = clone.EvaluationDate;
+            EvaluatorTextBox.Text = clone.Evaluator;
+            CompanyEvaluationTextBox.Text = clone.CompanyEvaluation;
+
+            RatingGoodCheckBox.IsChecked = clone.RatingGood;
+            RatingAverageCheckBox.IsChecked = clone.RatingAverage;
+            RatingPoorCheckBox.IsChecked = clone.RatingPoor;
+
+            if (clone.Contacts != null)
+                ContactsDataGrid.ItemsSource = new List<ContactPerson>(clone.Contacts);
         }
 
-        public AddClientWindow()
-        {
-        }
-
+        // زر الحفظ
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(ClientNameTextBox.Text))
@@ -32,7 +59,7 @@ namespace ETAG_ERP.Views
                 return;
             }
 
-            // تعبئة بيانات العميل
+            // تعبئة بيانات العميل من الحقول
             Client.Name = ClientNameTextBox.Text.Trim();
             Client.Address = AddressTextBox.Text.Trim();
             Client.Phone = PhoneTextBox.Text.Trim();
@@ -40,25 +67,31 @@ namespace ETAG_ERP.Views
             Client.Email = EmailTextBox.Text.Trim();
             Client.BusinessField = BusinessFieldTextBox.Text.Trim();
 
-            // تقييم الشركة
             Client.EngineerName = EngineerNameTextBox.Text.Trim();
             Client.EvaluationDate = EvaluationDatePicker.SelectedDate ?? DateTime.Now;
             Client.Evaluator = EvaluatorTextBox.Text.Trim();
             Client.CompanyEvaluation = CompanyEvaluationTextBox.Text.Trim();
 
-            // خانات التقييم
             Client.RatingGood = RatingGoodCheckBox.IsChecked ?? false;
             Client.RatingAverage = RatingAverageCheckBox.IsChecked ?? false;
             Client.RatingPoor = RatingPoorCheckBox.IsChecked ?? false;
 
-            // مسؤلين التواصل
             Client.Contacts = ContactsDataGrid.Items.OfType<ContactPerson>().ToList();
 
             try
             {
-                DatabaseHelper.InsertClient(Client);
-                MessageBox.Show("تم حفظ العميل بنجاح ✅", "تم", MessageBoxButton.OK, MessageBoxImage.Information);
-                this.DialogResult = true; // مهم لإغلاق ShowDialog
+                if (IsEditMode)
+                {
+                    DatabaseHelper.UpdateClient(Client);
+                    MessageBox.Show("تم تحديث بيانات العميل بنجاح ✅", "تم", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    DatabaseHelper.InsertClient(Client);
+                    MessageBox.Show("تم حفظ العميل بنجاح ✅", "تم", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+
+                this.DialogResult = true;
                 this.Close();
             }
             catch (Exception ex)
@@ -67,6 +100,7 @@ namespace ETAG_ERP.Views
             }
         }
 
+        // زر الطباعة
         private void PrintButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -79,7 +113,8 @@ namespace ETAG_ERP.Views
                 sb.AppendLine($"فاكس: {FaxTextBox.Text}");
                 sb.AppendLine($"البريد الإلكتروني: {EmailTextBox.Text}");
                 sb.AppendLine($"مجال العمل: {BusinessFieldTextBox.Text}");
-                sb.AppendLine("----- تقييم الشركة -----");
+
+                sb.AppendLine("\n----- تقييم الشركة -----");
                 sb.AppendLine($"المهندس: {EngineerNameTextBox.Text}");
                 sb.AppendLine($"تاريخ التقييم: {EvaluationDatePicker.SelectedDate?.ToShortDateString()}");
                 sb.AppendLine($"المسؤول عن التقييم: {EvaluatorTextBox.Text}");
@@ -88,9 +123,8 @@ namespace ETAG_ERP.Views
                 string rating = "";
                 if (RatingGoodCheckBox.IsChecked == true) rating += "جيد ";
                 if (RatingAverageCheckBox.IsChecked == true) rating += "متوسط ";
-                if (RatingPoorCheckBox.IsChecked == true) rating += "مقبول ";
+                if (RatingPoorCheckBox.IsChecked == true) rating += "ضعيف ";
                 sb.AppendLine($"التقييم المختار: {rating}");
-
 
                 FlowDocument doc = new FlowDocument(new Paragraph(new Run(sb.ToString())))
                 {
@@ -111,6 +145,7 @@ namespace ETAG_ERP.Views
             }
         }
 
+        // زر الإلغاء
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;

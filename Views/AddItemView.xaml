@@ -110,11 +110,11 @@
                 <!-- عائلات -->
                 <TextBlock Grid.Row="13" Grid.Column="0" Text="العائلة (حتى 5 مستويات):" Margin="5"/>
                 <StackPanel Grid.Row="13" Grid.Column="1" Orientation="Vertical" Margin="5">
-                    <ComboBox x:Name="cmbCat1" Margin="0 0 0 5" Height="28"/>
-                    <ComboBox x:Name="cmbCat2" Margin="0 0 0 5" Height="28"/>
-                    <ComboBox x:Name="cmbCat3" Margin="0 0 0 5" Height="28"/>
-                    <ComboBox x:Name="cmbCat4" Margin="0 0 0 5" Height="28"/>
-                    <ComboBox x:Name="cmbCat5" Height="28"/>
+                    <ComboBox x:Name="cmbCat1" Margin="0 0 0 5" Height="28" SelectionChanged="cmbCat1_SelectionChanged"/>
+                    <ComboBox x:Name="cmbCat2" Margin="0 0 0 5" Height="28" SelectionChanged="cmbCat2_SelectionChanged"/>
+                    <ComboBox x:Name="cmbCat3" Margin="0 0 0 5" Height="28" SelectionChanged="cmbCat3_SelectionChanged"/>
+                    <ComboBox x:Name="cmbCat4" Margin="0 0 0 5" Height="28" SelectionChanged="cmbCat4_SelectionChanged"/>
+                    <ComboBox x:Name="cmbCat5" Margin="0 0 0 5" Height="28" />
                 </StackPanel>
 
                 <!-- صورة -->
@@ -127,7 +127,7 @@
             </Grid>
 
             <!-- أزرار -->
-            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left">
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,724,0,19">
                 <Button Content="💾 حفظ" Width="120" Margin="5" Click="Save_Click"/>
                 <Button Content="❌ إلغاء" Width="120" Margin="5" Click="Cancel_Click"/>
             </StackPanel>

@@ -4,7 +4,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             d:DesignHeight="600" d:DesignWidth="900"
              Background="#F8F8F8">
 
     <UserControl.Resources>
@@ -131,11 +130,11 @@
         </ScrollViewer>
 
         <!-- أزرار التحكم -->
-        <WrapPanel Grid.Row="3" HorizontalAlignment="Center" Margin="0,20,0,0">
+        <WrapPanel Grid.Row="3" HorizontalAlignment="Center" Margin="0,6,0,14">
             <Button Content="⬅ رجوع" Style="{StaticResource GreenButtonStyle}"
-                    Click="BackCategory_Click" Margin="10"/>
+                    Click="BackCategory_Click" Margin="10" Height="46" Width="110"/>
             <Button Content="التالي ➡" Style="{StaticResource GreenButtonStyle}"
-                    Click="NextCategory_Click" Margin="10"/>
+                    Click="NextCategory_Click" Margin="10" Height="44" Width="114"/>
         </WrapPanel>
     </Grid>
 </UserControl>
