@@ -382,14 +382,16 @@ public static class DatabaseHelper
     }
 
     // ================== Execute Helpers ==================
-    public static void ExecuteNonQuery(string sql, params SQLiteParameter[] parameters)
+    public static int ExecuteNonQuery(string sql, params SQLiteParameter[] parameters)
     {
         using var conn = GetConnection();
         conn.Open();
         using var cmd = new SQLiteCommand(sql, conn);
-        if (parameters != null && parameters.Length > 0) cmd.Parameters.AddRange(parameters);
-        cmd.ExecuteNonQuery();
+        if (parameters != null && parameters.Length > 0)
+            cmd.Parameters.AddRange(parameters);
+        return cmd.ExecuteNonQuery();  // ترجع عدد الصفوف المتأثرة
     }
+
     public static DataTable GetCategories(int? parentId = null)
     {
         using (var conn = new SQLiteConnection(_connectionString))
