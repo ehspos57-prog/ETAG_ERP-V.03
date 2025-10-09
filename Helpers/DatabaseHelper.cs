@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
+using System.Windows;
 
 public static class DatabaseHelper
 {
@@ -394,9 +395,12 @@ public static class DatabaseHelper
         using (var conn = new SQLiteConnection(_connectionString))
         {
             conn.Open();
-            string query = parentId == null
-                ? "SELECT Id, Name FROM Categories WHERE ParentId IS NULL"
-                : "SELECT Id, Name FROM Categories WHERE ParentId = @ParentId";
+            string query;
+
+            if (parentId == null)
+                query = "SELECT Id, Name FROM Categories WHERE ParentId IS NULL";
+            else
+                query = "SELECT Id, Name FROM Categories WHERE ParentId = @ParentId";
 
             using (var cmd = new SQLiteCommand(query, conn))
             {
@@ -408,26 +412,26 @@ public static class DatabaseHelper
                     DataTable dt = new DataTable();
                     da.Fill(dt);
 
-                    // لو ما فيش صفوف من الداتا بيز للمستوى المطلوب، نُعيد DataTable جديد مبني من الـ Seed
+                    // ✅ هنا نمنع إضافة الأعمدة لو كانت موجودة
+                    if (!dt.Columns.Contains("Id"))
+                        dt.Columns.Add("Id", typeof(int));
+                    if (!dt.Columns.Contains("Name"))
+                        dt.Columns.Add("Name", typeof(string));
+
+                    // ✅ لو الجدول فاضي (مفيش داتا في DB) نحمل من الـ Seeder
                     if (dt.Rows.Count == 0 && parentId == null)
                     {
-                        DataTable seedDt = new DataTable();
-                        seedDt.Columns.Add("Id", typeof(int));
-                        seedDt.Columns.Add("Name", typeof(string));
                         int id = 1;
-
                         foreach (var name in CategorySeeder.GetSeedData()
                             .Select(c => c.Level1)
                             .Where(x => !string.IsNullOrWhiteSpace(x))
                             .Distinct())
                         {
-                            var row = seedDt.NewRow();
+                            var row = dt.NewRow();
                             row["Id"] = id++;
                             row["Name"] = name;
-                            seedDt.Rows.Add(row);
+                            dt.Rows.Add(row);
                         }
-
-                        return seedDt;
                     }
 
                     return dt;
@@ -817,37 +821,54 @@ public static class DatabaseHelper
         return Convert.ToInt32(ExecuteScalar("SELECT last_insert_rowid();"));
     }
 
-    public static void UpdateItem(Item item)
+    public static bool UpdateItem(Item item)
     {
-        ExecuteNonQuery(@"UPDATE Items SET ItemName=@ItemName, Code=@Code, Quantity=@Quantity, SellingPrice=@SellingPrice, PurchasePrice=@PurchasePrice,
+        try
+        {
+            ExecuteNonQuery(@"UPDATE Items SET 
+                          ItemName=@ItemName, Code=@Code, Quantity=@Quantity, SellingPrice=@SellingPrice, PurchasePrice=@PurchasePrice,
                           Price1=@Price1, Price2=@Price2, Price3=@Price3, Cat1=@Cat1, Cat2=@Cat2, Cat3=@Cat3, Cat4=@Cat4, Cat5=@Cat5,
-                          MinStock=@MinStock, Description=@Description, Unit=@Unit, Barcode=@Barcode, Tax=@Tax, Discount=@Discount, ImagePath=@ImagePath, UpdatedAt=@UpdatedAt
+                          MinStock=@MinStock, Description=@Description, Unit=@Unit, Barcode=@Barcode, Tax=@Tax, Discount=@Discount, 
+                          ImagePath=@ImagePath, UpdatedAt=@UpdatedAt
                           WHERE Id=@Id;",
-            new SQLiteParameter("@ItemName", item.ItemName ?? ""),
-            new SQLiteParameter("@Code", item.Code ?? ""),
-            new SQLiteParameter("@Quantity", item.Quantity),
-            new SQLiteParameter("@SellingPrice", item.SellingPrice),
-            new SQLiteParameter("@PurchasePrice", item.PurchasePrice),
-            new SQLiteParameter("@Price1", item.Price1),
-            new SQLiteParameter("@Price2", item.Price2),
-            new SQLiteParameter("@Price3", item.Price3),
-            new SQLiteParameter("@Cat1", item.Cat1 ?? ""),
-            new SQLiteParameter("@Cat2", item.Cat2 ?? ""),
-            new SQLiteParameter("@Cat3", item.Cat3 ?? ""),
-            new SQLiteParameter("@Cat4", item.Cat4 ?? ""),
-            new SQLiteParameter("@Cat5", item.Cat5 ?? ""),
-            new SQLiteParameter("@MinStock", item.MinStock),
-            new SQLiteParameter("@Description", item.Description ?? ""),
-            new SQLiteParameter("@Unit", item.Unit ?? ""),
-            new SQLiteParameter("@Barcode", item.Barcode ?? ""),
-            new SQLiteParameter("@Tax", item.Tax),
-            new SQLiteParameter("@Discount", item.Discount),
-            new SQLiteParameter("@ImagePath", item.ImagePath ?? ""),
-            new SQLiteParameter("@UpdatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")),
-            new SQLiteParameter("@Id", item.Id));
+                new SQLiteParameter("@ItemName", item.ItemName ?? ""),
+                new SQLiteParameter("@Code", item.Code ?? ""),
+                new SQLiteParameter("@Quantity", item.Quantity),
+                new SQLiteParameter("@SellingPrice", item.SellingPrice),
+                new SQLiteParameter("@PurchasePrice", item.PurchasePrice),
+                new SQLiteParameter("@Price1", item.Price1),
+                new SQLiteParameter("@Price2", item.Price2),
+                new SQLiteParameter("@Price3", item.Price3),
+                new SQLiteParameter("@Cat1", item.Cat1 ?? ""),
+                new SQLiteParameter("@Cat2", item.Cat2 ?? ""),
+                new SQLiteParameter("@Cat3", item.Cat3 ?? ""),
+                new SQLiteParameter("@Cat4", item.Cat4 ?? ""),
+                new SQLiteParameter("@Cat5", item.Cat5 ?? ""),
+                new SQLiteParameter("@MinStock", item.MinStock),
+                new SQLiteParameter("@Description", item.Description ?? ""),
+                new SQLiteParameter("@Unit", item.Unit ?? ""),
+                new SQLiteParameter("@Barcode", item.Barcode ?? ""),
+                new SQLiteParameter("@Tax", item.Tax),
+                new SQLiteParameter("@Discount", item.Discount),
+                new SQLiteParameter("@ImagePath", item.ImagePath ?? ""),
+                new SQLiteParameter("@UpdatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")),
+                new SQLiteParameter("@Id", item.Id));
+            return true;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"خطأ أثناء تحديث الصنف: {ex.Message}");
+            return false;
+        }
     }
 
-    public static void DeleteItem(int id) => ExecuteNonQuery("DELETE FROM Items WHERE Id=@Id;", new SQLiteParameter("@Id", id));
+
+
+public static bool DeleteItem(int id)
+{
+        int result = ExecuteNonQuery("DELETE FROM Items WHERE Id=@Id", new SQLiteParameter("@Id", id));
+    return result > 0;
+}
 
     public static List<Item> GetAllItems()
     {
@@ -856,6 +877,7 @@ public static class DatabaseHelper
         foreach (DataRow row in dt.Rows)
             list.Add(MapItem(row));
         return list;
+
     }
 
     private static Item MapItem(DataRow row) => new Item
@@ -1300,6 +1322,9 @@ public static class DatabaseHelper
         return dt;
     }
 
-
+    internal static void DeleteItem(object itemID)
+    {
+        throw new NotImplementedException();
+    }
 
 }

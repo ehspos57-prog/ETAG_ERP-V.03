@@ -3,8 +3,6 @@ using ETAG_ERP.Models;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,195 +11,97 @@ namespace ETAG_ERP.Views
 {
     public partial class AddItemWindow : Window
     {
-        private List<CategorySeedData> _categories = new List<CategorySeedData>
-        {
-            new CategorySeedData("Water", "Avis", "Stainless", "", "", "", "WASTA"),
-            new CategorySeedData("Water", "Avis", "Steel", "", "", "", "WASTE"),
-            new CategorySeedData("Water", "Flange", "back up ring", "", "", "", "WFLBR"),
-            new CategorySeedData("Water", "Flange", "Flange Blind", "", "", "", "WFLFB"),
-            new CategorySeedData("Water", "Flange", "pump flange", "", "", "", "WFLPF"),
-            new CategorySeedData("Water", "Flange", "Flange Slip", "", "", "", "WFLFS"),
-            new CategorySeedData("Water", "Flange", "socket weld", "", "", "", "WFLSW"),
-            new CategorySeedData("Water", "Valve", "butterfly valve", "", "", "", "WVBV"),
-            new CategorySeedData("Water", "Valve", "carbon steel ball valve", "", "", "", "WVCS"),
-            new CategorySeedData("Water", "Valve", "check valve", "", "", "", "WVCV"),
-            new CategorySeedData("Water", "Valve", "gear box", "", "", "", "WVGB"),
-            new CategorySeedData("Water", "Valve", "globe valve", "", "", "", "WVGV"),
-            new CategorySeedData("Water", "Valve", "stainless steel ball valve", "", "", "", "WVSSBV"),
-            new CategorySeedData("Water", "Fitting", "CAM LOCK AL", "", "", "", "WFCLA"),
-            new CategorySeedData("Water", "Fitting", "CAM LOCK CAST", "", "", "", "WFCLC"),
-            new CategorySeedData("Water", "Fitting", "CAM LOCK ST", "", "", "", "WFCLST"),
-            new CategorySeedData("Water", "Fitting", "cast iron", "", "", "", "WFCI"),
-            new CategorySeedData("pneumatic", "cylinder", "", "", "", "", "PNCY"),
-            new CategorySeedData("pneumatic", "FRL", "", "", "", "", "PNFRL"),
-            new CategorySeedData("pneumatic", "golbe valve", "", "", "", "", "PNGV"),
-            new CategorySeedData("pneumatic", "HOSE", "", "", "", "", "PNHO"),
-            new CategorySeedData("pneumatic", "VALVE", "", "", "", "", "PNVA"),
-            new CategorySeedData("pneumatic", "metal", "el Bow", "", "", "", "PNMEB"),
-            new CategorySeedData("pneumatic", "metal", "nipple", "", "", "", "PNMN"),
-            new CategorySeedData("pneumatic", "metal", "straight", "", "", "", "PNMS"),
-            new CategorySeedData("pneumatic", "metal", "TEE", "", "", "", "PNMTE"),
-            new CategorySeedData("pneumatic", "Plastic", "bushing", "", "", "", "PNPB"),
-            new CategorySeedData("pneumatic", "Plastic", "CROSS", "", "", "", "PNPC"),
-            new CategorySeedData("pneumatic", "Plastic", "el Bow special", "", "", "", "PNPEBS"),
-            new CategorySeedData("pneumatic", "Plastic", "Panel", "", "", "", "PNPA"),
-            new CategorySeedData("pneumatic", "Plastic", "PLUG", "", "", "", "PNPL"),
-            new CategorySeedData("pneumatic", "Plastic", "silensor", "", "", "", "PNPSI"),
-            new CategorySeedData("pneumatic", "Plastic", "straight", "", "", "", "PNPST"),
-            new CategorySeedData("pneumatic", "Plastic", "TEE", "", "", "", "PNPTE"),
-            new CategorySeedData("pneumatic", "Plastic", "Throttle&check", "", "", "", "PNPTH"),
-            new CategorySeedData("pneumatic", "Plastic", "y", "", "", "", "PNPY"),
-            new CategorySeedData("hydrulic", "fitting", "GERMAN", "ADAPTOR", "", "", "HFGAD"),
-            new CategorySeedData("hydrulic", "fitting", "GERMAN", "BUSH", "", "", "HFGBU"),
-            new CategorySeedData("hydrulic", "fitting", "GERMAN", "BUSHING", "", "", "HFGBS"),
-            new CategorySeedData("hydrulic", "fitting", "GERMAN", "CROSS", "", "", "HFGC"),
-            new CategorySeedData("hydrulic", "fitting", "GERMAN", "EL BOW", "", "", "HFGEB"),
-            new CategorySeedData("hydrulic", "fitting", "GERMAN", "EL BOW JIC", "", "", "HFGEBJ"),
-            new CategorySeedData("hydrulic", "fitting", "GERMAN", "NIPPLE", "", "", "HFGN"),
-            new CategorySeedData("hydrulic", "fitting", "GERMAN", "PLUG", "", "", "HFGPL"),
-            new CategorySeedData("hydrulic", "fitting", "GERMAN", "TEE", "", "", "HFGTE"),
-            new CategorySeedData("hydrulic", "accessories", "Air breather cap", "", "", "", "HAABC"),
-            new CategorySeedData("hydrulic", "accessories", "flange", "", "", "", "HAFL"),
-            new CategorySeedData("hydrulic", "accessories", "SPLIT FLANGE", "", "", "", "HASPFL"),
-            new CategorySeedData("hydrulic", "accessories", "TEST HOSE", "", "", "", "HATH"),
-            new CategorySeedData("hydrulic", "accessories", "TEST POINT", "", "", "", "HATP"),
-            new CategorySeedData("hydrulic", "accessories", "VISUAL LEVEL", "", "", "", "HAVL"),
-            new CategorySeedData("hydrulic", "filter", "FILTER ELEMENT", "", "", "", "HFFE"),
-            new CategorySeedData("hydrulic", "filter", "FILTER", "", "", "", "HFFIL"),
-            new CategorySeedData("hydrulic", "GAUGE", "Pressure gauge", "with glycerine", "", "", "HGPGWG"),
-            new CategorySeedData("hydrulic", "GAUGE", "Pressure gauge", "with out glycerine", "", "", "HGPGWOG"),
-            new CategorySeedData("hydrulic", "GAUGE", "temprture gauge", "", "", "", "HGTEG"),
-            new CategorySeedData("hydrulic", "pump&motor", "motor", "", "", "", "HPMM"),
-            new CategorySeedData("hydrulic", "pump&motor", "power steering", "", "", "", "HPMPS"),
-            new CategorySeedData("hydrulic", "pump&motor", "pump", "", "", "", "HPMPU"),
-            new CategorySeedData("hydrulic", "valve", "coil", "", "", "", "HVCOI"),
-            new CategorySeedData("hydrulic", "valve", "control", "", "", "", "HVCON"),
-            new CategorySeedData("hydrulic", "valve", "modular valve", "", "", "", "HVMV"),
-            new CategorySeedData("hydrulic", "valve", "in line valve", "", "", "", "HVILV"),
-            new CategorySeedData("SEAL", "dust seal", "METAL CASE", "", "", "", "SDSMC"),
-            new CategorySeedData("SEAL", "dust seal", "NPR", "", "", "", "SDSNPR"),
-            new CategorySeedData("SEAL", "hydraulic seal", "", "", "", "SHS"),
-            new CategorySeedData("SEAL", "KGD", "", "", "", "", "SKGD"),
-            new CategorySeedData("SEAL", "Mechanicul seal", "CONICAL", "", "", "", "SMESC"),
-            new CategorySeedData("SEAL", "Mechanicul seal", "STRAIGHT", "", "", "", "SMESS"),
-            new CategorySeedData("SEAL", "MPS", "", "", "", "", "SMPS"),
-            new CategorySeedData("SEAL", "OMEGA", "KOMATSU", "", "", "", "SOMKO"),
-            new CategorySeedData("SEAL", "OMEGA", "PISTON SEAL", "", "", "", "SOMPS"),
-            new CategorySeedData("SEAL", "OMEGA", "ROD SEAL", "", "", "", "SOMRS"),
-            new CategorySeedData("SEAL", "PACICING RING", "", "", "", "", "SPAR"),
-            new CategorySeedData("SEAL", "pneumatic seal", "E4", "", "", "", "SPNSE4"),
-            new CategorySeedData("SEAL", "pneumatic seal", "EU", "", "", "", "SPNSEU"),
-            new CategorySeedData("SEAL", "pneumatic seal", "PP", "", "", "", "SPNSPP"),
-            new CategorySeedData("SEAL", "RUBBER COUPLING", "", "", "", "", "SRUCO"),
-            new CategorySeedData("SEAL", "shaft seal", "METAL CASE", "", "", "", "SSSMC"),
-            new CategorySeedData("SEAL", "shaft seal", "NBR", "", "", "", "SSSNBR"),
-            new CategorySeedData("SEAL", "x RING", "", "", "", "", "SXRNG"),
-            new CategorySeedData("SEAL", "Oring", "VITON", "", "", "", "SORVI"),
-            new CategorySeedData("SEAL", "Oring", "Silicone", "", "", "", "SORSI"),
-            new CategorySeedData("SEAL", "Oring", "Teflon", "", "", "", "SORTE"),
-            new CategorySeedData("SEAL", "Oring", "ARTELON", "", "", "", "SORAR"),
-            new CategorySeedData("SEAL", "Oring", "oring rope", "", "", "", "SORORO"),
-            new CategorySeedData("SEAL", "Oring", "ORING BOX", "", "", "", "SORORB"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "1", "", "", "SORNBR1"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "1.5", "", "", "SORNBR2"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "2.5", "", "", "SORNBR3"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "1.6", "", "", "SORNBR4"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "1.78", "", "", "SORNBR5"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "2", "", "", "SORNBR6"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "2.4", "", "", "SORNBR7"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "2.5", "", "", "SORNBR8"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "2.62", "", "", "SORNBR9"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "3", "", "", "SORNB3"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "3.5", "", "", "SORNB4"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "3.53", "", "", "SORNB5"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "4", "", "", "SORNB6"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "4.5", "", "", "SORNB7"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "5", "", "", "SORNB8"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "5.7", "", "", "SORNB9"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "5.33", "", "", "SORINBR5"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "6", "", "", "SORINBR1"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "6.5", "", "", "SORINBR2"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "6.99", "", "", "SORINBR3"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "7", "", "", "SORINBR4"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "8", "", "", "SORINBR6"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "1.2", "", "", "SORINBR7"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "1.8", "", "", "SORINBR8"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "2.3", "", "", "SORINBR9"),
-            new CategorySeedData("SEAL", "Oring", "NBR", "3.2", "", "", "SONBRS3"),
-            new CategorySeedData("SEAL", "D RING", "", "", "", "", "SDRNG")
-        };
+        private List<ETAG_ERP.Helpers.CategorySeedData> _categories = ETAG_ERP.Helpers.CategorySeeder.GetSeedData();
+        private Item item;
 
+        // Constructor للصنف الجديد
         public AddItemWindow()
         {
             InitializeComponent();
-            LoadCategoriesLevel(cmbCat1, null);
-            Loaded += AddItemWindow_Loaded;
-        }
-
-        private void LoadCategoriesLevel(ComboBox combo, int? parentId)
-        {
-            var dt = DatabaseHelper.GetCategories(parentId);
-            combo.ItemsSource = dt.DefaultView;
-            combo.DisplayMemberPath = "Name";
-            combo.SelectedValuePath = "Id";
-        }
-
-
-        private void AddItemWindow_Loaded(object sender, RoutedEventArgs e)
-        {
             LoadCategoriesLevel1();
+            this.item = null;
         }
 
-        /// <summary>
-        /// Load level 1 categories from both Seed and DB
-        /// </summary>
-        private void LoadCategoriesLevel1()
+        // Constructor للصنف الموجود
+        public AddItemWindow(Item existingItem)
         {
-            var dbCategories = new List<string>();
-            var dt = DatabaseHelper.ExecuteQuery("SELECT Name FROM Categories WHERE ParentId IS NULL") as DataTable;
-            if (dt != null)
+            InitializeComponent();
+            LoadCategoriesLevel1();
+            this.item = existingItem;
+            LoadItemData();
+        }
+
+        // تحميل بيانات الصنف إذا كان موجود
+        private void LoadItemData()
+        {
+            if (item == null) return;
+
+            txtName.Text = item.ItemName;
+            txtCode.Text = item.Code;
+            txtBarcode.Text = item.Barcode;
+            cmbUnit.Text = item.Unit;
+            txtQuantity.Text = item.Quantity.ToString();
+            txtMinStock.Text = item.MinStock.ToString();
+            txtPurchasePrice.Text = item.PurchasePrice.ToString();
+            txtSellingPrice.Text = item.SellingPrice.ToString();
+            txtPrice1.Text = item.Price1.ToString();
+            txtPrice2.Text = item.Price2.ToString();
+            txtPrice3.Text = item.Price3.ToString();
+            txtDiscount.Text = item.Discount.ToString();
+            txtTax.Text = item.Tax.ToString();
+            chkIsActive.IsChecked = item.IsActive;
+            txtDescription.Text = item.Description;
+            txtImagePath.Text = item.ImagePath;
+
+            if (!string.IsNullOrWhiteSpace(item.ImagePath) && System.IO.File.Exists(item.ImagePath))
             {
-                foreach (DataRow row in dt.Rows)
-                    dbCategories.Add(row["Name"].ToString());
+                ProductImage.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(item.ImagePath));
             }
 
-            var seedCategories = _categories
-                .Select(c => c.Level1)
-                .Where(l => !string.IsNullOrWhiteSpace(l))
-                .Distinct()
-                .ToList();
+            // تعبئة التصنيفات
+            cmbCat1.SelectedItem = item.Cat1;
+            cmbCat2.SelectedItem = item.Cat2;
+            cmbCat3.SelectedItem = item.Cat3;
+            cmbCat4.SelectedItem = item.Cat4;
+            cmbCat5.SelectedItem = item.Cat5;
+        }
 
-            var merged = seedCategories
-                .Union(dbCategories)
-                .OrderBy(x => x)
-                .ToList();
+        // تحميل المستوى الأول من التصنيفات
+        private void LoadCategoriesLevel1()
+        {
+            try
+            {
+                var level1 = _categories
+                    .Select(c => c.Level1)
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Distinct()
+                    .OrderBy(x => x)
+                    .ToList();
 
-            cmbCat1.ItemsSource = merged;
+                cmbCat1.ItemsSource = level1;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("خطأ أثناء تحميل المستوى الأول من التصنيفات: " + ex.Message);
+            }
         }
 
         private void cmbCat1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var selected = cmbCat1.SelectedItem?.ToString();
-            if (string.IsNullOrWhiteSpace(selected)) return;
+            var selected1 = cmbCat1.SelectedItem?.ToString();
+            if (string.IsNullOrWhiteSpace(selected1)) return;
 
-            // From DB
-            var dbCategories = new List<string>();
-            var dt = DatabaseHelper.ExecuteQuery(
-                "SELECT Name FROM Categories WHERE ParentId IN (SELECT Id FROM Categories WHERE Name=@Name)",
-                new Dictionary<string, object> { { "@Name", selected } }) as DataTable;
-
-            if (dt != null)
-                foreach (DataRow row in dt.Rows)
-                    dbCategories.Add(row["Name"].ToString());
-
-            // From Seed
-            var seedCategories = _categories
-                .Where(c => c.Level1 == selected && !string.IsNullOrWhiteSpace(c.Level2))
+            var level2 = _categories
+                .Where(c => c.Level1 == selected1 && !string.IsNullOrWhiteSpace(c.Level2))
                 .Select(c => c.Level2)
                 .Distinct()
+                .OrderBy(x => x)
                 .ToList();
 
-            cmbCat2.ItemsSource = seedCategories.Union(dbCategories).OrderBy(x => x).ToList();
+            cmbCat2.ItemsSource = level2;
+            cmbCat3.ItemsSource = null;
+            cmbCat4.ItemsSource = null;
+            cmbCat5.ItemsSource = null;
         }
 
         private void cmbCat2_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -210,22 +110,16 @@ namespace ETAG_ERP.Views
             var selected2 = cmbCat2.SelectedItem?.ToString();
             if (string.IsNullOrWhiteSpace(selected2)) return;
 
-            var dbCategories = new List<string>();
-            var dt = DatabaseHelper.ExecuteQuery(
-                "SELECT Name FROM Categories WHERE ParentId IN (SELECT Id FROM Categories WHERE Name=@Name)",
-                new Dictionary<string, object> { { "@Name", selected2 } }) as DataTable;
-
-            if (dt != null)
-                foreach (DataRow row in dt.Rows)
-                    dbCategories.Add(row["Name"].ToString());
-
-            var seedCategories = _categories
+            var level3 = _categories
                 .Where(c => c.Level1 == selected1 && c.Level2 == selected2 && !string.IsNullOrWhiteSpace(c.Level3))
                 .Select(c => c.Level3)
                 .Distinct()
+                .OrderBy(x => x)
                 .ToList();
 
-            cmbCat3.ItemsSource = seedCategories.Union(dbCategories).OrderBy(x => x).ToList();
+            cmbCat3.ItemsSource = level3;
+            cmbCat4.ItemsSource = null;
+            cmbCat5.ItemsSource = null;
         }
 
         private void cmbCat3_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -235,22 +129,15 @@ namespace ETAG_ERP.Views
             var selected3 = cmbCat3.SelectedItem?.ToString();
             if (string.IsNullOrWhiteSpace(selected3)) return;
 
-            var dbCategories = new List<string>();
-            var dt = DatabaseHelper.ExecuteQuery(
-                "SELECT Name FROM Categories WHERE ParentId IN (SELECT Id FROM Categories WHERE Name=@Name)",
-                new Dictionary<string, object> { { "@Name", selected3 } }) as DataTable;
-
-            if (dt != null)
-                foreach (DataRow row in dt.Rows)
-                    dbCategories.Add(row["Name"].ToString());
-
-            var seedCategories = _categories
+            var level4 = _categories
                 .Where(c => c.Level1 == selected1 && c.Level2 == selected2 && c.Level3 == selected3 && !string.IsNullOrWhiteSpace(c.Level4))
                 .Select(c => c.Level4)
                 .Distinct()
+                .OrderBy(x => x)
                 .ToList();
 
-            cmbCat4.ItemsSource = seedCategories.Union(dbCategories).OrderBy(x => x).ToList();
+            cmbCat4.ItemsSource = level4;
+            cmbCat5.ItemsSource = null;
         }
 
         private void cmbCat4_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -261,38 +148,17 @@ namespace ETAG_ERP.Views
             var selected4 = cmbCat4.SelectedItem?.ToString();
             if (string.IsNullOrWhiteSpace(selected4)) return;
 
-            var dbCategories = new List<string>();
-            var dt = DatabaseHelper.ExecuteQuery(
-                "SELECT Name FROM Categories WHERE ParentId IN (SELECT Id FROM Categories WHERE Name=@Name)",
-                new Dictionary<string, object> { { "@Name", selected4 } }) as DataTable;
-
-            if (dt != null)
-                foreach (DataRow row in dt.Rows)
-                    dbCategories.Add(row["Name"].ToString());
-
-            var seedCategories = _categories
+            var level5 = _categories
                 .Where(c => c.Level1 == selected1 && c.Level2 == selected2 && c.Level3 == selected3 && c.Level4 == selected4 && !string.IsNullOrWhiteSpace(c.Level5))
                 .Select(c => c.Level5)
                 .Distinct()
+                .OrderBy(x => x)
                 .ToList();
 
-            cmbCat5.ItemsSource = seedCategories.Union(dbCategories).OrderBy(x => x).ToList();
+            cmbCat5.ItemsSource = level5;
         }
 
-        private void cmbCat5_SelectionChanged(object sender, SelectionChangedEventArgs e) { }
-
-        private string? SelectedCategory
-        {
-            get
-            {
-                if (!string.IsNullOrWhiteSpace(cmbCat5.Text)) return cmbCat5.Text;
-                if (!string.IsNullOrWhiteSpace(cmbCat4.Text)) return cmbCat4.Text;
-                if (!string.IsNullOrWhiteSpace(cmbCat3.Text)) return cmbCat3.Text;
-                if (!string.IsNullOrWhiteSpace(cmbCat2.Text)) return cmbCat2.Text;
-                if (!string.IsNullOrWhiteSpace(cmbCat1.Text)) return cmbCat1.Text;
-                return null;
-            }
-        }
+        // دالة حفظ الصنف
         private void Save_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -302,25 +168,31 @@ namespace ETAG_ERP.Views
                     MessageBox.Show("من فضلك أدخل اسم الصنف");
                     return;
                 }
+
                 if (!decimal.TryParse(txtSellingPrice.Text, out decimal sellingPrice))
                 {
-                    MessageBox.Show("سعر البيع غير صالح"); return;
+                    MessageBox.Show("سعر البيع غير صالح");
+                    return;
                 }
                 if (!decimal.TryParse(txtPurchasePrice.Text, out decimal purchasePrice))
                 {
-                    MessageBox.Show("سعر الشراء غير صالح"); return;
+                    MessageBox.Show("سعر الشراء غير صالح");
+                    return;
                 }
                 if (!int.TryParse(txtQuantity.Text, out int stockQty))
                 {
-                    MessageBox.Show("الكمية غير صالحة"); return;
+                    MessageBox.Show("الكمية غير صالحة");
+                    return;
                 }
 
                 int.TryParse(txtMinStock.Text, out int minStock);
                 decimal.TryParse(txtTax.Text, out decimal tax);
                 decimal.TryParse(txtDiscount.Text, out decimal discount);
-                decimal? price1 = string.IsNullOrWhiteSpace(txtPrice1.Text) ? null : decimal.Parse(txtPrice1.Text);
-                decimal? price2 = string.IsNullOrWhiteSpace(txtPrice2.Text) ? null : decimal.Parse(txtPrice2.Text);
-                decimal? price3 = string.IsNullOrWhiteSpace(txtPrice3.Text) ? null : decimal.Parse(txtPrice3.Text);
+                decimal? price1 = string.IsNullOrWhiteSpace(txtPrice1.Text) ? (decimal?)null : decimal.Parse(txtPrice1.Text);
+                decimal? price2 = string.IsNullOrWhiteSpace(txtPrice2.Text) ? (decimal?)null : decimal.Parse(txtPrice2.Text);
+                decimal? price3 = string.IsNullOrWhiteSpace(txtPrice3.Text) ? (decimal?)null : decimal.Parse(txtPrice3.Text);
+
+                var (cat1, cat2, cat3, cat4, cat5) = GetCategoryValues();
 
                 var newItem = new Item
                 {
@@ -328,7 +200,7 @@ namespace ETAG_ERP.Views
                     Code = txtCode.Text.Trim(),
                     Barcode = txtBarcode.Text.Trim(),
                     Unit = cmbUnit.Text,
-                    StockQuantity = stockQty,
+                    Quantity = stockQty,
                     MinStock = minStock,
                     PurchasePrice = purchasePrice,
                     SellingPrice = sellingPrice,
@@ -339,7 +211,11 @@ namespace ETAG_ERP.Views
                     Tax = tax,
                     IsActive = chkIsActive.IsChecked ?? true,
                     Description = txtDescription.Text.Trim(),
-                    Category = SelectedCategory,
+                    Cat1 = cat1,
+                    Cat2 = cat2,
+                    Cat3 = cat3,
+                    Cat4 = cat4,
+                    Cat5 = cat5,
                     ImagePath = txtImagePath.Text.Trim()
                 };
 
@@ -354,14 +230,14 @@ namespace ETAG_ERP.Views
             }
         }
 
-        private string? GetSelectedCategory()
+        private (string cat1, string cat2, string cat3, string cat4, string cat5) GetCategoryValues()
         {
-            if (!string.IsNullOrWhiteSpace(cmbCat5.Text)) return cmbCat5.Text;
-            if (!string.IsNullOrWhiteSpace(cmbCat4.Text)) return cmbCat4.Text;
-            if (!string.IsNullOrWhiteSpace(cmbCat3.Text)) return cmbCat3.Text;
-            if (!string.IsNullOrWhiteSpace(cmbCat2.Text)) return cmbCat2.Text;
-            if (!string.IsNullOrWhiteSpace(cmbCat1.Text)) return cmbCat1.Text;
-            return null;
+            var c1 = cmbCat1.SelectedItem?.ToString();
+            var c2 = cmbCat2.SelectedItem?.ToString();
+            var c3 = cmbCat3.SelectedItem?.ToString();
+            var c4 = cmbCat4.SelectedItem?.ToString();
+            var c5 = cmbCat5.SelectedItem?.ToString();
+            return (c1, c2, c3, c4, c5);
         }
 
         private void BrowseImage_Click(object sender, RoutedEventArgs e)
@@ -375,7 +251,5 @@ namespace ETAG_ERP.Views
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e) => Close();
-
-
     }
 }

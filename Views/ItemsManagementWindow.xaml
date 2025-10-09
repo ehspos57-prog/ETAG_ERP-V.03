@@ -1,0 +1,43 @@
+﻿<Window x:Class="ETAG_ERP.Views.ItemsManagementWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="إدارة الأصناف" Height="600" Width="1000" ResizeMode="CanResize">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- شريط البحث والفلاتر -->
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
+            <TextBox x:Name="SearchTextBox" Width="200" TextChanged="SearchTextBox_TextChanged"/>
+            <ComboBox x:Name="Category1Filter" Width="150" SelectionChanged="Filter_Changed" />
+            <ComboBox x:Name="Category2Filter" Width="150" SelectionChanged="Filter_Changed" />
+            <ComboBox x:Name="Category3Filter" Width="150" SelectionChanged="Filter_Changed" />
+            <ComboBox x:Name="Category4Filter" Width="150" SelectionChanged="Filter_Changed" />
+        </StackPanel>
+
+        <!-- DataGrid عرض الأصناف -->
+        <DataGrid x:Name="ItemsDataGrid" Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False"
+                  SelectionMode="Single" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="اسم الصنف" Binding="{Binding ItemName}" Width="*"/>
+                <DataGridTextColumn Header="الفئة 1" Binding="{Binding Cat1}" Width="120"/>
+                <DataGridTextColumn Header="الفئة 2" Binding="{Binding Cat2}" Width="120"/>
+                <DataGridTextColumn Header="الفئة 3" Binding="{Binding Cat3}" Width="120"/>
+                <DataGridTextColumn Header="الفئة 4" Binding="{Binding Cat4}" Width="120"/>
+                <DataGridTextColumn Header="سعر البيع" Binding="{Binding SellingPrice}" Width="100"/>
+                <DataGridTextColumn Header="الكمية" Binding="{Binding Quantity}" Width="80"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- أزرار التحكم -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="إضافة جديد" Width="100" Click="AddButton_Click"/>
+            <Button Content="تعديل" Width="80" Click="EditButton_Click"/>
+            <Button Content="حذف" Width="80" Click="DeleteButton_Click"/>
+            <Button Content="تحديث" Width="80" Click="ReloadButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

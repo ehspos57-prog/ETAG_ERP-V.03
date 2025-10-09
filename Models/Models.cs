@@ -663,7 +663,8 @@ namespace ETAG_ERP.Models
         public string? Cat4 { get; set; }
         public string? Cat5 { get; set; }
         public string? Category { get; internal set; }
-    }
+    public int ItemID { get; internal set; }
+}
 
     // =======================
     // الفواتير

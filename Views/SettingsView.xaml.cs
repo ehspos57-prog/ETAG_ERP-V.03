@@ -47,7 +47,7 @@ namespace ETAG_ERP.Views
         public string Level4 { get; internal set; }
         public string? Level1 { get; internal set; }
         public string? Level2 { get; internal set; }
-        public string? Level3 { get; internal set; }
+        public string? Level3 { get; internal set; } = null;
         public string? Level5 { get; internal set; }
     }
 
