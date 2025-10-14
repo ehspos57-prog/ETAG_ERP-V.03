@@ -1,16 +1,13 @@
 ﻿using ETAG_ERP.Commands;
 using Microsoft.Win32;
-using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.SQLite;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace ETAG_ERP.Views
 {

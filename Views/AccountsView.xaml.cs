@@ -1,11 +1,8 @@
 ﻿using ClosedXML.Excel;
-using ETAG_ERP.Models;
-using System;
 using System.Collections.ObjectModel;
 using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 

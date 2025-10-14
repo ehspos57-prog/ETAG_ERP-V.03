@@ -1,11 +1,7 @@
-﻿using ETAG_ERP.Helpers;
-using ETAG_ERP.Models;
-using Microsoft.Win32;
-using System;
+﻿using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;

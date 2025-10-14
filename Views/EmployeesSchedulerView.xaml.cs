@@ -1,8 +1,6 @@
 ﻿using ETAG_ERP.Models;
 using ETAG_ERP.Views;
-using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows.Input;
 
 namespace ETAG_ERP.ViewModels

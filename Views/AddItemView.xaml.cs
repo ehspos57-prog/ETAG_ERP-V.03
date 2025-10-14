@@ -1,9 +1,4 @@
-﻿using ETAG_ERP.Helpers;
-using ETAG_ERP.Models;
-using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -11,27 +6,50 @@ namespace ETAG_ERP.Views
 {
     public partial class AddItemWindow : Window
     {
-        private List<ETAG_ERP.Helpers.CategorySeedData> _categories = ETAG_ERP.Helpers.CategorySeeder.GetSeedData();
+        private List<ETAG_ERP.Helpers.CategorySeedData> _categories;
         private Item item;
+        private bool isEditMode = false;
 
         // Constructor للصنف الجديد
         public AddItemWindow()
         {
             InitializeComponent();
+
+            // ✅ تأكد أن السيدنج تم (في أول تشغيل فقط)
+            DatabaseHelper.SeedCategoriesIfEmpty();
+
+            // ✅ تحميل التصنيفات من القاعدة
+            var dbCategories = DatabaseHelper.GetAllCategories();
+            _categories = dbCategories.Select(c => new ETAG_ERP.Helpers.CategorySeedData(
+                c.Level1, c.Level2, c.Level3, c.Level4, c.Level5, c.Code
+            )).ToList();
+
             LoadCategoriesLevel1();
             this.item = null;
         }
 
-        // Constructor للصنف الموجود
+        // Constructor لتعديل صنف موجود
+
         public AddItemWindow(Item existingItem)
         {
             InitializeComponent();
+
+            // ✅ نفس الإجراء عند التعديل
+            DatabaseHelper.SeedCategoriesIfEmpty();
+
+            var dbCategories = DatabaseHelper.GetAllCategories();
+            _categories = dbCategories.Select(c => new ETAG_ERP.Helpers.CategorySeedData(
+                c.Level1, c.Level2, c.Level3, c.Level4, c.Level5, c.Code
+            )).ToList();
+
             LoadCategoriesLevel1();
+
             this.item = existingItem;
+            this.isEditMode = true;
             LoadItemData();
         }
 
-        // تحميل بيانات الصنف إذا كان موجود
+        // تحميل بيانات الصنف في حالة التعديل
         private void LoadItemData()
         {
             if (item == null) return;
@@ -53,12 +71,11 @@ namespace ETAG_ERP.Views
             txtDescription.Text = item.Description;
             txtImagePath.Text = item.ImagePath;
 
-            if (!string.IsNullOrWhiteSpace(item.ImagePath) && System.IO.File.Exists(item.ImagePath))
+            if (!string.IsNullOrEmpty(item.ImagePath) && System.IO.File.Exists(item.ImagePath))
             {
                 ProductImage.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(item.ImagePath));
             }
 
-            // تعبئة التصنيفات
             cmbCat1.SelectedItem = item.Cat1;
             cmbCat2.SelectedItem = item.Cat2;
             cmbCat3.SelectedItem = item.Cat3;
@@ -188,9 +205,9 @@ namespace ETAG_ERP.Views
                 int.TryParse(txtMinStock.Text, out int minStock);
                 decimal.TryParse(txtTax.Text, out decimal tax);
                 decimal.TryParse(txtDiscount.Text, out decimal discount);
-                decimal? price1 = string.IsNullOrWhiteSpace(txtPrice1.Text) ? (decimal?)null : decimal.Parse(txtPrice1.Text);
-                decimal? price2 = string.IsNullOrWhiteSpace(txtPrice2.Text) ? (decimal?)null : decimal.Parse(txtPrice2.Text);
-                decimal? price3 = string.IsNullOrWhiteSpace(txtPrice3.Text) ? (decimal?)null : decimal.Parse(txtPrice3.Text);
+                decimal.TryParse(txtPrice1.Text, out decimal p1);
+                decimal.TryParse(txtPrice2.Text, out decimal p2);
+                decimal.TryParse(txtPrice3.Text, out decimal p3);
 
                 var (cat1, cat2, cat3, cat4, cat5) = GetCategoryValues();
 
@@ -204,9 +221,9 @@ namespace ETAG_ERP.Views
                     MinStock = minStock,
                     PurchasePrice = purchasePrice,
                     SellingPrice = sellingPrice,
-                    Price1 = price1 ?? 0,
-                    Price2 = price2 ?? 0,
-                    Price3 = price3 ?? 0,
+                    Price1 = p1,
+                    Price2 = p2,
+                    Price3 = p3,
                     Discount = discount,
                     Tax = tax,
                     IsActive = chkIsActive.IsChecked ?? true,
@@ -219,10 +236,28 @@ namespace ETAG_ERP.Views
                     ImagePath = txtImagePath.Text.Trim()
                 };
 
-                DatabaseHelper.InsertItem(newItem);
-                MessageBox.Show("تم حفظ الصنف بنجاح ✅", "نجاح", MessageBoxButton.OK, MessageBoxImage.Information);
-                DialogResult = true;
-                Close();
+                bool success;
+
+                if (isEditMode && item != null)
+                {
+                    newItem.ItemID = item.ItemID;
+                    success = DatabaseHelper.UpdateItem(newItem);
+                }
+                else
+                {
+                    success = DatabaseHelper.InsertItem(newItem);
+                }
+
+                if (success)
+                {
+                    MessageBox.Show(isEditMode ? "تم تحديث بيانات الصنف بنجاح ✅" : "تم حفظ الصنف بنجاح ✅", "نجاح", MessageBoxButton.OK, MessageBoxImage.Information);
+                    DialogResult = true;
+                    Close();
+                }
+                else
+                {
+                    MessageBox.Show("فشل في حفظ البيانات. تحقق من قاعدة البيانات.", "خطأ", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             catch (Exception ex)
             {
@@ -250,6 +285,9 @@ namespace ETAG_ERP.Views
             }
         }
 
-        private void Cancel_Click(object sender, RoutedEventArgs e) => Close();
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
     }
 }

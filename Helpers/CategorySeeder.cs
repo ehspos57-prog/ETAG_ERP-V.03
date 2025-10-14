@@ -1,13 +1,36 @@
-﻿using ETAG_ERP.Views;
-using System;
-using System.Collections.Generic;
+﻿using ETAG_ERP.Models;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace ETAG_ERP.Helpers
 {
+    public class CategorySeedData
+    {
+        public string? Level1 { get; set; }
+        public string? Level2 { get; set; }
+        public string? Level3 { get; set; }
+        public string? Level4 { get; set; }
+        public string? Level5 { get; set; }
+        public string? Code { get; set; }
+
+
+        public CategorySeedData(string? level1, string? level2, string? level3, string? level4, string? level5, string? code)
+        {
+            Level1 = level1;
+            Level2 = level2;
+            Level3 = level3;
+            Level4 = level4;
+            Level5 = level5;
+            Code = code;
+        }
+
+        internal static IEnumerable<object> GetSeedData()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     // ✅ الكلاس الأساسي لتوليد بيانات التصنيفات
     public static class CategorySeeder
     {
@@ -104,26 +127,9 @@ namespace ETAG_ERP.Helpers
                 new CategorySeedData("SEAL", "Oring", "ORING BOX", "", "", "SORORB"),
                 new CategorySeedData("SEAL", "D RING", "", "", "", "SDRNG")
             };
+
         }
     }
 
-    public class CategorySeedData
-    {
-        public string? Level1 { get; set; }
-        public string? Level2 { get; set; }
-        public string? Level3 { get; set; }
-        public string? Level4 { get; set; }
-        public string? Level5 { get; set; }
-        public string? Code { get; set; }
 
-        public CategorySeedData(string? level1, string? level2, string? level3, string? level4, string? level5, string? code)
-        {
-            Level1 = level1;
-            Level2 = level2;
-            Level3 = level3;
-            Level4 = level4;
-            Level5 = level5;
-            Code = code;
-        }
-    }
 }

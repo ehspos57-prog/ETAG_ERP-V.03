@@ -1,13 +1,10 @@
 ﻿using iTextSharp.text;
 using iTextSharp.text.pdf;
 using OfficeOpenXml;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using System.Windows.Media;
 
 namespace ETAG_ERP.Helpers
 {

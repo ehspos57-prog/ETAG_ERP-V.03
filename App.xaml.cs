@@ -1,7 +1,4 @@
-﻿using ETAG_ERP.Helpers;
-using ETAG_ERP.Views;
-using ETAG_ERP.Models;
-using System.Windows;
+﻿using System.Windows;
 
 namespace ETAG_ERP
 {

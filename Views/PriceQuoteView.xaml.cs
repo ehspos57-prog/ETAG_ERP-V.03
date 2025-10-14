@@ -1,5 +1,4 @@
 ﻿using ETAG_ERP.Commands;
-using ETAG_ERP.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.SQLite;

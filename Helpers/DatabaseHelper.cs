@@ -1,7 +1,5 @@
 ﻿using ETAG_ERP.Helpers;
 using ETAG_ERP.Models;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
@@ -11,6 +9,7 @@ public static class DatabaseHelper
 {
     private static string _dbPath = "ETAG_ERP.db";
     private static readonly string _connectionString = $"Data Source={_dbPath};Version=3;";
+
 
     public static string ConnectionString { get; internal set; }
 
@@ -772,67 +771,170 @@ public static class DatabaseHelper
 
     public static List<Category> GetAllCategories()
     {
-        var dt = GetDataTable("SELECT * FROM Categories ORDER BY Id;");
-        var list = new List<Category>();
-        foreach (DataRow r in dt.Rows)
+        var categories = new List<Category>();
+
+        try
         {
-            list.Add(new Category
+            using var conn = new SQLiteConnection(_connectionString);
+            conn.Open();
+
+            using var cmd = new SQLiteCommand("SELECT * FROM Categories ORDER BY Id;", conn);
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
             {
-                Id = Convert.ToInt32(r["Id"]),
-                Name = r["Name"]?.ToString(),
-                ParentId = r["ParentId"] != DBNull.Value ? Convert.ToInt32(r["ParentId"]) : 0,
-                Type = r.Table.Columns.Contains("Type") ? r["Type"]?.ToString() : "",
-                Description = r.Table.Columns.Contains("Description") ? r["Description"]?.ToString() : "",
-                IsActive = r.Table.Columns.Contains("IsActive") && r["IsActive"] != DBNull.Value ? Convert.ToBoolean(r["IsActive"]) : true
-            });
+                categories.Add(new Category
+                {
+                    Level1 = reader["Level1"]?.ToString(),
+                    Level2 = reader["Level2"]?.ToString(),
+                    Level3 = reader["Level3"]?.ToString(),
+                    Level4 = reader["Level4"]?.ToString(),
+                    Level5 = reader["Level5"]?.ToString(),
+                    Code = reader["Code"]?.ToString()
+                });
+            }
+
+            // ✅ في حالة الجدول فاضي (أول تشغيل)
+            if (categories.Count == 0)
+            {
+                categories = GetCategorySeedData(); // دالة بنضفها زي ما وضحتلك قبل كده
+            }
         }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"خطأ أثناء تحميل التصنيفات: {ex.Message}");
+        }
+
+        return categories;
+    }
+
+    private static List<Category> GetCategorySeedData()
+    {
+        var seed = ETAG_ERP.Helpers.CategorySeeder.GetSeedData() ?? new List<CategorySeedData>();
+
+        var list = seed.Select(s => new Category
+        {
+            Level1 = s.Level1,
+            Level2 = s.Level2,
+            Level3 = s.Level3,
+            Level4 = s.Level4,
+            Level5 = s.Level5,
+            Code = s.Code ?? ""
+        }).ToList();
+
         return list;
     }
 
-    // ================== Items ==================
-    public static int InsertItem(Item item)
+    public static void InsertCategoriesIfEmpty(List<CategorySeedData> seedData)
     {
-        string sql = @"INSERT INTO Items (ItemName, Code, Quantity, SellingPrice, PurchasePrice,
-                   Price1, Price2, Price3, Cat1, Cat2, Cat3, Cat4, Cat5, MinStock, Description,
-                   Unit, Barcode, Tax, Discount, ImagePath, CreatedAt)
-                   VALUES (@ItemName,@Code,@Quantity,@SellingPrice,@PurchasePrice,
-                   @Price1,@Price2,@Price3,@Cat1,@Cat2,@Cat3,@Cat4,@Cat5,@MinStock,@Description,
-                   @Unit,@Barcode,@Tax,@Discount,@ImagePath,@CreatedAt);";
-        ExecuteNonQuery(sql,
-            new SQLiteParameter("@ItemName", item.ItemName ?? ""),
-            new SQLiteParameter("@Code", item.Code ?? ""),
-            new SQLiteParameter("@Quantity", item.Quantity),
-            new SQLiteParameter("@SellingPrice", item.SellingPrice),
-            new SQLiteParameter("@PurchasePrice", item.PurchasePrice),
-            new SQLiteParameter("@Price1", item.Price1),
-            new SQLiteParameter("@Price2", item.Price2),
-            new SQLiteParameter("@Price3", item.Price3),
-            new SQLiteParameter("@Cat1", item.Cat1 ?? ""),
-            new SQLiteParameter("@Cat2", item.Cat2 ?? ""),
-            new SQLiteParameter("@Cat3", item.Cat3 ?? ""),
-            new SQLiteParameter("@Cat4", item.Cat4 ?? ""),
-            new SQLiteParameter("@Cat5", item.Cat5 ?? ""),
-            new SQLiteParameter("@MinStock", item.MinStock),
-            new SQLiteParameter("@Description", item.Description ?? ""),
-            new SQLiteParameter("@Unit", item.Unit ?? ""),
-            new SQLiteParameter("@Barcode", item.Barcode ?? ""),
-            new SQLiteParameter("@Tax", item.Tax),
-            new SQLiteParameter("@Discount", item.Discount),
-            new SQLiteParameter("@ImagePath", item.ImagePath ?? ""),
-            new SQLiteParameter("@CreatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")));
-        return Convert.ToInt32(ExecuteScalar("SELECT last_insert_rowid();"));
+        try
+        {
+            using var conn = new SQLiteConnection(_connectionString);
+            conn.Open();
+
+            using var cmdCheck = new SQLiteCommand("SELECT COUNT(*) FROM Categories;", conn);
+            long count = (long)cmdCheck.ExecuteScalar();
+            if (count > 0) return; // لو فيها بيانات بالفعل، ما نضيفش السيدنج تاني
+
+            foreach (var c in seedData)
+            {
+                using var cmd = new SQLiteCommand(@"
+                INSERT INTO Categories (Level1, Level2, Level3, Level4, Level5, Code)
+                VALUES (@l1,@l2,@l3,@l4,@l5,@code);", conn);
+
+                cmd.Parameters.AddWithValue("@l1", c.Level1 ?? "");
+                cmd.Parameters.AddWithValue("@l2", c.Level2 ?? "");
+                cmd.Parameters.AddWithValue("@l3", c.Level3 ?? "");
+                cmd.Parameters.AddWithValue("@l4", c.Level4 ?? "");
+                cmd.Parameters.AddWithValue("@l5", c.Level5 ?? "");
+                cmd.Parameters.AddWithValue("@code", c.Code ?? "");
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"خطأ أثناء حفظ التصنيفات الابتدائية: {ex.Message}");
+        }
+    }
+    // ================== Items ==================
+    public static bool InsertItem(Item item)
+    {
+        try
+        {
+            string query = @"
+            INSERT INTO Items 
+                (ItemName, Code, Quantity, SellingPrice, PurchasePrice, Price1, Price2, Price3,
+                 Cat1, Cat2, Cat3, Cat4, Cat5, MinStock, Description, Unit, Barcode, Tax, Discount, ImagePath, CreatedAt, UpdatedAt)
+            VALUES
+                (@ItemName, @Code, @Quantity, @SellingPrice, @PurchasePrice, @Price1, @Price2, @Price3,
+                 @Cat1, @Cat2, @Cat3, @Cat4, @Cat5, @MinStock, @Description, @Unit, @Barcode, @Tax, @Discount, @ImagePath, @CreatedAt, @UpdatedAt)
+        ";
+
+            int affected = ExecuteNonQuery(query,
+                new SQLiteParameter("@ItemName", item.ItemName ?? ""),
+                new SQLiteParameter("@Code", item.Code ?? ""),
+                new SQLiteParameter("@Quantity", item.Quantity),
+                new SQLiteParameter("@SellingPrice", item.SellingPrice),
+                new SQLiteParameter("@PurchasePrice", item.PurchasePrice),
+                new SQLiteParameter("@Price1", item.Price1),
+                new SQLiteParameter("@Price2", item.Price2),
+                new SQLiteParameter("@Price3", item.Price3),
+                new SQLiteParameter("@Cat1", item.Cat1 ?? ""),
+                new SQLiteParameter("@Cat2", item.Cat2 ?? ""),
+                new SQLiteParameter("@Cat3", item.Cat3 ?? ""),
+                new SQLiteParameter("@Cat4", item.Cat4 ?? ""),
+                new SQLiteParameter("@Cat5", item.Cat5 ?? ""),
+                new SQLiteParameter("@MinStock", item.MinStock),
+                new SQLiteParameter("@Description", item.Description ?? ""),
+                new SQLiteParameter("@Unit", item.Unit ?? ""),
+                new SQLiteParameter("@Barcode", item.Barcode ?? ""),
+                new SQLiteParameter("@Tax", item.Tax),
+                new SQLiteParameter("@Discount", item.Discount),
+                new SQLiteParameter("@ImagePath", item.ImagePath ?? ""),
+                new SQLiteParameter("@CreatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")),
+                new SQLiteParameter("@UpdatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
+            );
+
+            return affected > 0;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"خطأ أثناء إضافة الصنف: {ex.Message}", "خطأ", MessageBoxButton.OK, MessageBoxImage.Error);
+            return false;
+        }
     }
 
     public static bool UpdateItem(Item item)
     {
         try
         {
-            ExecuteNonQuery(@"UPDATE Items SET 
-                          ItemName=@ItemName, Code=@Code, Quantity=@Quantity, SellingPrice=@SellingPrice, PurchasePrice=@PurchasePrice,
-                          Price1=@Price1, Price2=@Price2, Price3=@Price3, Cat1=@Cat1, Cat2=@Cat2, Cat3=@Cat3, Cat4=@Cat4, Cat5=@Cat5,
-                          MinStock=@MinStock, Description=@Description, Unit=@Unit, Barcode=@Barcode, Tax=@Tax, Discount=@Discount, 
-                          ImagePath=@ImagePath, UpdatedAt=@UpdatedAt
-                          WHERE Id=@Id;",
+            string query = @"
+        UPDATE Items SET 
+            ItemName=@ItemName,
+            Code=@Code,
+            Quantity=@Quantity,
+            SellingPrice=@SellingPrice,
+            PurchasePrice=@PurchasePrice,
+            Price1=@Price1,
+            Price2=@Price2,
+            Price3=@Price3,
+            Cat1=@Cat1,
+            Cat2=@Cat2,
+            Cat3=@Cat3,
+            Cat4=@Cat4,
+            Cat5=@Cat5,
+            MinStock=@MinStock,
+            Description=@Description,
+            Unit=@Unit,
+            Barcode=@Barcode,
+            Tax=@Tax,
+            Discount=@Discount,
+            ImagePath=@ImagePath,
+            UpdatedAt=@UpdatedAt
+        WHERE Id=@Id
+    ";
+
+            int affected = ExecuteNonQuery(query,
                 new SQLiteParameter("@ItemName", item.ItemName ?? ""),
                 new SQLiteParameter("@Code", item.Code ?? ""),
                 new SQLiteParameter("@Quantity", item.Quantity),
@@ -854,23 +956,25 @@ public static class DatabaseHelper
                 new SQLiteParameter("@Discount", item.Discount),
                 new SQLiteParameter("@ImagePath", item.ImagePath ?? ""),
                 new SQLiteParameter("@UpdatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")),
-                new SQLiteParameter("@Id", item.Id));
-            return true;
+                new SQLiteParameter("@Id", item.ItemID)
+            );
+
+            return affected > 0;
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"خطأ أثناء تحديث الصنف: {ex.Message}");
+            MessageBox.Show($"خطأ أثناء تحديث الصنف: {ex.Message}", "خطأ", MessageBoxButton.OK, MessageBoxImage.Error);
             return false;
         }
     }
 
 
 
-public static bool DeleteItem(int id)
-{
+    public static bool DeleteItem(int id)
+    {
         int result = ExecuteNonQuery("DELETE FROM Items WHERE Id=@Id", new SQLiteParameter("@Id", id));
-    return result > 0;
-}
+        return result > 0;
+    }
 
     public static List<Item> GetAllItems()
     {
@@ -1328,5 +1432,38 @@ public static bool DeleteItem(int id)
     {
         throw new NotImplementedException();
     }
+    // ✅ دالة لزرع التصنيفات في قاعدة البيانات في حال كانت فارغة
+    public static void SeedCategoriesIfEmpty()
+    {
+        try
+        {
+            var existing = GetAllCategories();
+            if (existing != null && existing.Count > 0)
+                return;
 
+            var seedData = ETAG_ERP.Helpers.CategorySeeder.GetSeedData();
+            foreach (var seed in seedData)
+            {
+                var category = new Category
+                {
+                    Level1 = seed.Level1,
+                    Level2 = seed.Level2,
+                    Level3 = seed.Level3,
+                    Level4 = seed.Level4,
+                    Level5 = seed.Level5,
+                    Code = seed.Code
+                };
+                InsertCategory(category);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("❌ خطأ أثناء عملية السيدنج: " + ex.Message);
+        }
+    }
+
+    internal static void AddCategory(object category)
+    {
+        throw new NotImplementedException();
+    }
 }

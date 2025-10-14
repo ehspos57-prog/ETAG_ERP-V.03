@@ -1,21 +1,12 @@
-﻿using ETAG_ERP.Models;
-using iTextSharp.text;
-using iTextSharp.text.pdf;
-using Microsoft.VisualBasic; // لإضافة Interaction.InputBox
+﻿using Microsoft.VisualBasic; // لإضافة Interaction.InputBox
 using Microsoft.Win32;
 using OfficeOpenXml;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
-using System.Linq;
-using System.Printing;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media.Imaging;
 
 namespace ETAG_ERP.Views
 {

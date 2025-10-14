@@ -1,8 +1,4 @@
-﻿using ETAG_ERP.Helpers;
-using ETAG_ERP.Models; // Invoice هنا
-using System;
-using System.Collections.Generic;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents; // للطباعة
 

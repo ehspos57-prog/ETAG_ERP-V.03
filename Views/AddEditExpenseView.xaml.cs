@@ -1,7 +1,5 @@
-﻿using ETAG_ERP.Helpers;
-using ETAG_ERP.Models;
+﻿using ETAG_ERP.Models;
 using ETAG_ERP.Views;
-using System;
 using System.Windows.Input;
 
 namespace ETAG_ERP.ViewModels

@@ -1,9 +1,4 @@
 ﻿// Views/AddUserWindow.xaml.cs
-using ETAG_ERP.Helpers;
-using ETAG_ERP.Models;
-using System;
-using System.Linq;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 

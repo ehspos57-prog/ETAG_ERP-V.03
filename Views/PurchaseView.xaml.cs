@@ -1,12 +1,7 @@
-﻿using ETAG_ERP.Helpers;
-using ETAG_ERP.Models;
-using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Data.SQLite;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using static ETAG_ERP.Models.Purchase;
 
 namespace ETAG_ERP.Views
 {

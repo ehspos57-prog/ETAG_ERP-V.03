@@ -99,6 +99,12 @@
             <TextBlock Text="📂 إدارة التصنيفات" FontSize="22" FontWeight="Bold" Foreground="#2C3E50"/>
             <TextBlock x:Name="CategoryTitle" Text="(الكل)" FontSize="16"
                        Foreground="Gray" Margin="15,5,0,0"/>
+            <Button
+            Content="➕ الاصناف"
+            Width="200" Height="40"
+            HorizontalAlignment="Left"
+            Click="Show_Edit_Item_Click"
+            Style="{StaticResource GreenButtonStyle}" Margin="157,2,0,2"/>
         </StackPanel>
 
         <!-- مربع البحث -->
@@ -137,11 +143,6 @@
             <Button Content="التالي ➡" Style="{StaticResource GreenButtonStyle}"
                     Click="NextCategory_Click" Margin="10" Height="44" Width="114"/>
         </WrapPanel>
-        <Button
-            Content="➕ الاصناف"
-            Width="200" Height="40"
-            HorizontalAlignment="Left"
-            Click="Show_Edit_Item_Click"
-            Style="{StaticResource GreenButtonStyle}" Margin="157,2,0,2"/>
+
     </Grid>
 </UserControl>

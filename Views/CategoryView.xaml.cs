@@ -1,10 +1,8 @@
 ﻿using ETAG_ERP.Helpers;
-using ETAG_ERP.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using ETAG_ERP.Models;
+
 
 namespace ETAG_ERP.Views
 {
@@ -249,4 +247,5 @@ namespace ETAG_ERP.Views
             window.ShowDialog();  // ShowDialog عشان تبقى modal وتوقف التفاعل مع الكاتيجوري لحد ما تقفلها
         }
     }
+
 }
