@@ -32,11 +32,15 @@ namespace ETAG_ERP.Helpers
     }
 
     // ✅ الكلاس الأساسي لتوليد بيانات التصنيفات
-    public static class CategorySeeder
+public static class CategorySeeder
+{
+    private static List<CategorySeedData>? _seedData;
+
+    public static List<CategorySeedData> GetSeedData()
     {
-        public static List<CategorySeedData> GetSeedData()
+        if (_seedData == null)
         {
-            return new List<CategorySeedData>
+            _seedData = new List<CategorySeedData>
             {
                 new CategorySeedData("Water", "Avis", "Stainless", "", "", "WASTA"),
                 new CategorySeedData("Water", "Avis", "Steel", "", "", "WASTE"),
@@ -127,7 +131,9 @@ namespace ETAG_ERP.Helpers
                 new CategorySeedData("SEAL", "Oring", "ORING BOX", "", "", "SORORB"),
                 new CategorySeedData("SEAL", "D RING", "", "", "", "SDRNG")
             };
+            }
 
+            return _seedData;
         }
     }
 

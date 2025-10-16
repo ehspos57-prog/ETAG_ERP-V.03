@@ -1428,11 +1428,96 @@ public static class DatabaseHelper
         return dt;
     }
 
+    // ✅ حذف صنف من قاعدة البيانات
     internal static void DeleteItem(object itemID)
     {
-        throw new NotImplementedException();
+        try
+        {
+            using (var conn = new SQLiteConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new SQLiteCommand("DELETE FROM Items WHERE Id = @id", conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", itemID);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("❌ خطأ أثناء حذف الصنف: " + ex.Message);
+        }
     }
-    // ✅ دالة لزرع التصنيفات في قاعدة البيانات في حال كانت فارغة
+    // ✅ إضافة تصنيف جديد إلى قاعدة البيانات
+    public static int InsertCategory(ETAG_ERP.Models.Category category)
+    {
+        if (category == null)
+            return 0; // لأننا بنرجع int مش bool
+
+        try
+        {
+            int rowsAffected = 0;
+
+            using (var conn = new SQLiteConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new SQLiteCommand(conn))
+                {
+                    cmd.CommandText = @"
+                INSERT INTO Categories (Level1, Level2, Level3, Level4, Level5, Code)
+                VALUES (@L1, @L2, @L3, @L4, @L5, @Code)";
+                    cmd.Parameters.AddWithValue("@L1", category.Level1 ?? "");
+                    cmd.Parameters.AddWithValue("@L2", category.Level2 ?? "");
+                    cmd.Parameters.AddWithValue("@L3", category.Level3 ?? "");
+                    cmd.Parameters.AddWithValue("@L4", category.Level4 ?? "");
+                    cmd.Parameters.AddWithValue("@L5", category.Level5 ?? "");
+                    cmd.Parameters.AddWithValue("@Code", category.Code ?? "");
+
+                    rowsAffected = cmd.ExecuteNonQuery();
+                }
+            }
+
+            // ✅ إضافة التصنيف إلى بيانات السيدينج (في الذاكرة)
+            var seedList = CategorySeeder.GetSeedData();
+
+            // تجنب التكرار لو الكود موجود فعلاً
+            if (!seedList.Any(x => x.Code == category.Code))
+            {
+                seedList.Add(new CategorySeedData(
+                    category.Level1,
+                    category.Level2,
+                    category.Level3,
+                    category.Level4,
+                    category.Level5,
+                    category.Code
+                ));
+            }
+
+            return rowsAffected; // بيرجع عدد الصفوف المتأثرة
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("❌ خطأ أثناء إضافة التصنيف: " + ex.Message);
+            return 0;
+        }
+    }
+
+    // ✅ دالة مبسطة تستدعي InsertCategory وتتعامل مع الأخطاء داخليًا
+    internal static void AddCategory(ETAG_ERP.Models.Category category)
+    {
+        try
+        {
+            int inserted = InsertCategory(category);
+            if (inserted <= 0)
+                Console.WriteLine("⚠️ فشل في إضافة التصنيف داخل AddCategory.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("❌ خطأ أثناء AddCategory: " + ex.Message);
+        }
+    }
+
+    // ✅ دالة لزرع التصنيفات الأساسية (Seed) عند أول تشغيل فقط
     public static void SeedCategoriesIfEmpty()
     {
         try
@@ -1444,7 +1529,7 @@ public static class DatabaseHelper
             var seedData = ETAG_ERP.Helpers.CategorySeeder.GetSeedData();
             foreach (var seed in seedData)
             {
-                var category = new Category
+                var category = new ETAG_ERP.Models.Category
                 {
                     Level1 = seed.Level1,
                     Level2 = seed.Level2,
@@ -1453,8 +1538,13 @@ public static class DatabaseHelper
                     Level5 = seed.Level5,
                     Code = seed.Code
                 };
-                InsertCategory(category);
+
+                int success = InsertCategory(category);
+                if (success <= 0)
+                    Console.WriteLine($"⚠️ فشل في إدخال التصنيف {category.Level1}-{category.Level2}");
             }
+
+            Console.WriteLine("✅ تم تنفيذ السيدنج للتصنيفات بنجاح.");
         }
         catch (Exception ex)
         {
@@ -1462,8 +1552,5 @@ public static class DatabaseHelper
         }
     }
 
-    internal static void AddCategory(object category)
-    {
-        throw new NotImplementedException();
-    }
+
 }
